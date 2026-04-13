@@ -347,7 +347,7 @@
               <div className="p-8 md:p-12 flex flex-col h-full">
                 <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
                   <span className="bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">{activeArticle.categories?.[0] || 'UPDATE'}</span>
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
+                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-800 dark:text-white">{activeArticle.title || "Untitled"}</h2>
                 <div className="news-content flex-grow text-lg text-slate-700 dark:text-slate-300 font-sans" dangerouslySetInnerHTML={{ __html: articleBody }} />
@@ -462,7 +462,7 @@
               </div>
               <div className="space-y-3 overflow-y-auto max-h-[350px] pr-2">
                 {tasks.map(task => (
-                  <div key={task.id} className={`flex items-start space-x-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${task.done ? 'bg-slate-50 border-slate-100 dark:bg-slate-900/30 dark:border-slate-800/30 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-violet-300 dark:hover:border-violet-800'}`} onClick={() => toggleTask(task.id)}>
+                  <div key={task.id} className={`flex items-start space-x-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${task.done ? 'bg-slate-50 border-slate-50 dark:bg-slate-900/30 dark:border-slate-800/30 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-violet-300 dark:hover:border-violet-800'}`} onClick={() => toggleTask(task.id)}>
                     <button className="mt-0.5 shrink-0 transition-transform hover:scale-110">
                       {task.done ? <CheckCircle className="w-6 h-6 text-emerald-500" /> : <Circle className="w-6 h-6 text-slate-300 dark:text-slate-600" />}
                     </button>
@@ -655,7 +655,7 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">LED Forward Current (If) mA</label><input type="number" value={ledIf} onChange={e=>setLedIf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-800 dark:text-white" /></div>
                     </div>
                     <div className="bg-amber-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
-                      <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-2">Required Resistor</div>
+                      <div className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-2">Required Resistor</div>
                       <div className="text-6xl font-mono font-bold">{(ledIf && (ledVs > ledVf)) ? ((ledVs - ledVf) / (ledIf / 1000)).toFixed(0) : 0} Ω</div>
                     </div>
                  </div>
@@ -684,7 +684,7 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Input Value</label><input type="number" value={dbV1} onChange={e=>setDbV1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Output Value</label><input type="number" value={dbV2} onChange={e=>setDbV2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm text-slate-800 dark:text-white">
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm text-slate-800 dark:text-white">
                       <div className="mb-6"><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
                       <div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
                     </div>
@@ -1234,7 +1234,7 @@
                 <User className="w-3.5 h-3.5" /><span>Created By</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-800 dark:text-white">{APP_CONFIG.creator}</h2>
-              <p className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-500 dark:text-slate-400" /> {APP_CONFIG.course}</p>
+              <p className="text-lg font-medium text-slate-500 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-400" /> {APP_CONFIG.course}</p>
               <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 mb-8">
                 <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
                   This project was prepared as part of the mini-project for our first-year <strong>EE & IPR</strong> subject. Designed explicitly for the {APP_CONFIG.university} syllabus, this acts as a comprehensive academic companion.
@@ -1286,7 +1286,7 @@
     // ==========================================
     // APP LOGIC & ROUTING
     // ==========================================
-    const initialState = { theme: 'light', activeTab: 'news', animations: true, isSidebarOpen: false };
+    const initialState = { theme: 'dark', activeTab: 'news', animations: true, isSidebarOpen: false };
     function reducer(state, action) {
       switch (action.type) {
         case 'SET_THEME': return { ...state, theme: action.payload };
