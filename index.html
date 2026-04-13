@@ -69,9 +69,14 @@
     const { useState, useEffect, useReducer, useRef, useMemo } = React;
     
     // 2. Safe extraction of Icons (Prevent White Screen if CDN fails)
-    if (!window.lucideReact) {
-      throw new Error("Lucide Icons CDN failed to load. The network might be blocking it.");
-    }
+    // The CDN exports as 'LucideReact' (Capital L). Added a Proxy fallback to guarantee it never crashes again.
+    const FallbackIcon = (props) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    );
+    const IconLibrary = window.LucideReact || window.lucideReact || new Proxy({}, { get: () => FallbackIcon });
+
     const { 
       Activity, Calculator, Settings, Play, Pause, RotateCcw,
       Zap, Cpu, Hash, Layers, Sun, Moon, Terminal,
@@ -79,7 +84,7 @@
       ListTodo, Code, ChevronRight, GitBranch, Radio, Globe, 
       ArrowLeft, ExternalLink, Sliders, Database, RefreshCw, 
       Mail, Calendar
-    } = window.lucideReact;
+    } = IconLibrary;
 
     // ==========================================
     // CONFIGURATION
