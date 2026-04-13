@@ -25,8 +25,8 @@
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
     
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]:focus { outline: none; }
@@ -180,24 +180,24 @@
 
     const FALLBACK_NEWS = [
       {
-        title: "TSMC Begins 2nm Silicon Production Trials for Next-Gen SoC",
+        title: "TSMC Begins 2nm Silicon Production Trials",
         categories: ["VLSI"], pubDate: new Date().toISOString(),
         description: "Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node...",
-        content: "<p>Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node. This represents a monumental leap in VLSI design, pushing the boundaries of Moore's Law further than previously thought possible.</p><p>Implementing Gate-All-Around (GAA) FETs instead of traditional FinFETs promises to drastically reduce power consumption while increasing computational density. By wrapping the gate entirely around the channel, engineers can significantly reduce short-channel effects and leakage current.</p>",
+        content: "<p>Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node. This represents a monumental leap in VLSI design.</p>",
         link: "https://www.eetimes.com/"
       },
       {
-        title: "IEEE Ratifies New 6G Spectrum Guidelines Focusing on THz Bands",
+        title: "New 6G Spectrum Guidelines Focusing on THz Bands",
         categories: ["TELECOM"], pubDate: new Date(Date.now() - 3600000).toISOString(), 
         description: "The IEEE standard body has released its preliminary guidelines for 6G telecommunications, heavily exploring the Terahertz spectrum...",
-        content: "<p>The IEEE standard body has released its preliminary guidelines for 6G telecommunications. Moving beyond the millimeter-wave frequencies used in 5G, the new standards heavily explore the Terahertz (THz) spectrum, operating between 100 GHz and 10 THz.</p><p>This ultra-high frequency band is expected to deliver microsecond latency and terabit-per-second data rates, opening doors for true holographic communications, advanced remote robotics, and immersive augmented reality.</p>",
+        content: "<p>The IEEE standard body has released its preliminary guidelines for 6G telecommunications. Moving beyond the millimeter-wave frequencies used in 5G, the new standards heavily explore the Terahertz (THz) spectrum.</p>",
         link: "https://www.eetimes.com/"
       },
       {
         title: "KTU Announces Updated Embedded Systems Curriculum",
         categories: ["ACADEMIC"], pubDate: new Date(Date.now() - 7200000).toISOString(),
         description: "Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum with heavier emphasis on modern IoT...",
-        content: "<p>Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum. The new syllabus places a heavier emphasis on modern IoT frameworks, Edge AI processing, and real-time operating systems (RTOS), ensuring students are equipped for Industry 4.0.</p><p>The university plans to phase out legacy 8-bit microcontrollers (like the 8051) in the core lab modules in favor of 32-bit ARM Cortex-M based architectures.</p>",
+        content: "<p>Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum. The new syllabus places a heavier emphasis on modern IoT frameworks.</p>",
         link: "https://ktu.edu.in/"
       }
     ];
@@ -237,34 +237,58 @@
         Wednesday: ['EST130', 'EST120', 'MAT101', 'HUN101'], Thursday: ['EST110', 'PHT100', 'EST120', 'Sports'],
         Friday: ['CYT100', 'MAT101', 'EST130 Lab', 'EST130 Lab'],
       };
+      
       const [schedule, setSchedule] = useState(() => {
         try { const saved = localStorage.getItem('ece_timetable'); return saved ? JSON.parse(saved) : defaultSchedule; } catch(e) { return defaultSchedule; }
       });
+      
+      const [numPeriods, setNumPeriods] = useState(() => {
+        return Math.max(...Object.values(schedule).map(arr => arr.length), 4);
+      });
+
       const updatePeriod = (day, index, val) => {
         const newDay = [...schedule[day]]; newDay[index] = val; setSchedule({...schedule, [day]: newDay});
       };
+      
       const saveTimetable = () => { localStorage.setItem('ece_timetable', JSON.stringify(schedule)); showToast("Timetable saved locally."); };
+
+      const addPeriod = () => {
+        const newSch = {...schedule};
+        Object.keys(newSch).forEach(d => newSch[d].push(""));
+        setSchedule(newSch);
+        setNumPeriods(n => n + 1);
+      };
+
+      const removePeriod = () => {
+        if(numPeriods <= 1) return;
+        const newSch = {...schedule};
+        Object.keys(newSch).forEach(d => newSch[d].pop());
+        setSchedule(newSch);
+        setNumPeriods(n => n - 1);
+      };
 
       return (
         <div className="animate-in fade-in duration-700">
           <Widget title="Weekly Schedule" icon={Calendar}>
+            <div className="flex justify-end space-x-2 mb-4">
+               <button onClick={addPeriod} className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">+ Add Period</button>
+               <button onClick={removePeriod} className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">- Remove Period</button>
+               <button onClick={saveTimetable} className="bg-violet-500 hover:bg-violet-600 text-white px-5 py-1.5 rounded-lg text-xs font-bold tracking-widest uppercase shadow-md transition-colors ml-4">Save</button>
+            </div>
             <div className="overflow-x-auto pb-4">
-              <div className="min-w-[700px]">
-                <div className="grid grid-cols-5 gap-4 mb-4">
-                  <div className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 pl-24">Period 1</div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Period 2</div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Period 3</div>
-                  <div className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Period 4</div>
-                  <div className="text-right">
-                    <button onClick={saveTimetable} className="bg-violet-500 hover:bg-violet-600 text-white px-5 py-2 rounded-xl text-xs font-bold tracking-widest uppercase shadow-md transition-colors">Save</button>
-                  </div>
+              <div style={{ minWidth: `${100 + (numPeriods * 140)}px` }}>
+                <div className="flex items-center space-x-4 mb-4 px-4">
+                  <div className="w-20"></div>
+                  {Array.from({length: numPeriods}).map((_, i) => (
+                    <div key={i} className="flex-1 text-center text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Period {i+1}</div>
+                  ))}
                 </div>
                 <div className="space-y-4">
                   {Object.keys(schedule).map(day => (
                     <div key={day} className="flex items-center space-x-4 bg-slate-50/80 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50 transition-colors">
-                      <div className="w-20 font-bold text-sm text-slate-800 dark:text-slate-300 tracking-wider">{day}</div>
+                      <div className="w-20 font-bold text-sm text-slate-800 dark:text-slate-200 tracking-wider">{day}</div>
                       {schedule[day].map((period, i) => (
-                        <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-violet-400 transition-all text-center text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm" placeholder="Free" />
+                        <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm font-semibold outline-none focus:border-violet-400 transition-all text-center text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm" placeholder="Free" />
                       ))}
                     </div>
                   ))}
@@ -297,7 +321,8 @@
             const data = await response.json();
             if (isMounted) {
               if (data?.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
-                setNews(data.items.slice(0, 9)); setIsLive(true); setLastSync(new Date());
+                const cleanNews = data.items.filter(item => !item.title.toLowerCase().includes('sponsor') && !item.description.toLowerCase().includes('sponsor'));
+                setNews(cleanNews.slice(0, 9)); setIsLive(true); setLastSync(new Date());
               } else throw new Error("Data parsing error");
             }
           } catch (err) {
@@ -320,11 +345,11 @@
             </button>
             <div className="flex-grow max-w-4xl mx-auto w-full bg-white/90 dark:bg-slate-900/80 backdrop-blur-3xl border border-slate-200/50 dark:border-slate-800/50 rounded-[2.5rem] shadow-xl overflow-hidden">
               <div className="p-8 md:p-12 flex flex-col h-full">
-                <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
                   <span className="bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">{activeArticle.categories?.[0] || 'UPDATE'}</span>
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
+                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-900 dark:text-white">{activeArticle.title || "Untitled"}</h2>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-800 dark:text-white">{activeArticle.title || "Untitled"}</h2>
                 <div className="news-content flex-grow text-lg text-slate-700 dark:text-slate-300 font-sans" dangerouslySetInnerHTML={{ __html: articleBody }} />
               </div>
             </div>
@@ -336,8 +361,8 @@
         <div className="animate-in fade-in duration-700 h-full flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-slate-200/60 dark:border-slate-800/60 pb-6 gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Tech News Feed</h2>
-              <div className="flex items-center space-x-3 mt-2 text-slate-500 dark:text-slate-400">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white">Tech News Feed</h2>
+              <div className="flex items-center space-x-3 mt-2 text-slate-600 dark:text-slate-400">
                 <p className="text-sm font-medium">Industry Updates</p><span className="opacity-50">•</span>
                 <p className="text-xs font-mono flex items-center"><RefreshCw className="w-3 h-3 mr-1.5 opacity-70" /> Auto-sync</p>
               </div>
@@ -433,7 +458,7 @@
           <Widget title="Tasks & Assignments" icon={ListTodo}>
             <div className="flex flex-col h-full">
               <div className="relative mb-6">
-                <input type="text" placeholder="Add new task... (Press Enter)" value={newTask} onChange={(e) => setNewTask(e.target.value)} onKeyDown={addTask} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 px-5 text-sm outline-none focus:border-violet-400 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-400 shadow-sm" />
+                <input type="text" placeholder="Add new task... (Press Enter)" value={newTask} onChange={(e) => setNewTask(e.target.value)} onKeyDown={addTask} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 px-5 text-sm outline-none focus:border-violet-400 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-500 shadow-sm" />
               </div>
               <div className="space-y-3 overflow-y-auto max-h-[350px] pr-2">
                 {tasks.map(task => (
@@ -493,6 +518,19 @@
       const [tCurr, setTCurr] = useState(1);
       const [tThick, setTThick] = useState(1);
 
+      // 555 Timer specific
+      const [t5R1, setT5R1] = useState(1);
+      const [t5R2, setT5R2] = useState(10);
+      const [t5C, setT5C] = useState(10);
+      const t5Freq = useMemo(() => {
+         if(t5R1===0 && t5R2===0) return 0;
+         return 1.44 / (((t5R1*1000) + 2*(t5R2*1000)) * (t5C/1000000));
+      }, [t5R1, t5R2, t5C]);
+      const t5Duty = useMemo(() => {
+         if(t5R1===0 && t5R2===0) return 0;
+         return ((t5R1 + t5R2) / (t5R1 + 2*t5R2)) * 100;
+      }, [t5R1, t5R2]);
+
       const TOOL_TABS = [
         { id: 'resistor', label: 'Resistor Decoder', icon: Layers },
         { id: 'inductor', label: 'Inductor Decoder', icon: Layers },
@@ -505,6 +543,7 @@
         { id: 'wavelength', label: 'Wavelength', icon: Radio },
         { id: 'awg', label: 'AWG Lookup', icon: Hash },
         { id: 'trace', label: 'PCB Trace Width', icon: Terminal },
+        { id: 'timer555', label: '555 Timer Calc', icon: Clock }
       ];
 
       return (
@@ -529,7 +568,7 @@
                   <div className="text-6xl font-bold font-mono tracking-tighter text-slate-800 dark:text-white mb-8">{formatUnit(resValue, 'Ω')}</div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
                     {[0, 1, 2].map(bIdx => (
-                      <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
+                      <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
                         value={bands[bIdx].name} style={{ backgroundColor: bands[bIdx].hex, color: bands[bIdx].text }}
                         onChange={(e) => { const newBands = [...bands]; newBands[bIdx] = RESISTOR_COLORS.find(c => c.name === e.target.value); setBands(newBands); }}>
                         {RESISTOR_COLORS.map(c => <option key={c.name} value={c.name} style={{ backgroundColor: c.hex, color: c.text }}>{c.name}</option>)}
@@ -546,7 +585,7 @@
                   <div className="text-6xl font-bold font-mono tracking-tighter text-slate-800 dark:text-white mb-8">{formatUnit(indValue, 'µH')}</div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
                     {[0, 1, 2].map(bIdx => (
-                      <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
+                      <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
                         value={indBands[bIdx].name} style={{ backgroundColor: indBands[bIdx].hex, color: indBands[bIdx].text }}
                         onChange={(e) => { const newBands = [...indBands]; newBands[bIdx] = RESISTOR_COLORS.find(c => c.name === e.target.value); setIndBands(newBands); }}>
                         {RESISTOR_COLORS.map(c => <option key={c.name} value={c.name} style={{ backgroundColor: c.hex, color: c.text }}>{c.name}</option>)}
@@ -560,16 +599,16 @@
             {activeTool === 'base' && (
               <Widget title="Number System Converter" icon={Hash}>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 block">Decimal (Base 10)</label>
                       <input type="text" value={bases.dec} onChange={e => updateBases(e.target.value, 10)} className="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-700 py-2 text-2xl font-mono outline-none focus:border-violet-500 text-slate-800 dark:text-white" />
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
-                      <label className="text-xs font-bold text-sky-500 dark:text-sky-400 uppercase tracking-wider mb-4 block">Binary (Base 2)</label>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                      <label className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-4 block">Binary (Base 2)</label>
                       <input type="text" value={bases.bin} onChange={e => updateBases(e.target.value, 2)} className="w-full bg-transparent border-b-2 border-sky-300 dark:border-sky-800 py-2 text-2xl font-mono outline-none focus:border-sky-500 text-sky-600 dark:text-sky-400" />
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800/80 shadow-sm">
-                      <label className="text-xs font-bold text-pink-500 dark:text-pink-400 uppercase tracking-wider mb-4 block">Hexadecimal (Base 16)</label>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                      <label className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider mb-4 block">Hexadecimal (Base 16)</label>
                       <input type="text" value={bases.hex} onChange={e => updateBases(e.target.value, 16)} className="w-full bg-transparent border-b-2 border-pink-300 dark:border-pink-800 py-2 text-2xl font-mono outline-none focus:border-pink-500 text-pink-600 dark:text-pink-400 uppercase" />
                     </div>
                  </div>
@@ -584,9 +623,9 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Inductance (mH)</label><input type="number" value={rL} onChange={e=>setRL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Capacitance (µF)</label><input type="number" value={rC} onChange={e=>setRC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-violet-500/10 p-8 rounded-3xl flex flex-col justify-center border border-violet-200 dark:border-violet-500/20 shadow-sm">
-                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Inductive Reactance (XL)</div><div className="text-4xl font-mono font-bold text-violet-800 dark:text-violet-300">{(2 * Math.PI * rFreq * (rL/1000)).toFixed(2)} Ω</div></div>
-                      <div><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Capacitive Reactance (XC)</div><div className="text-4xl font-mono font-bold text-violet-800 dark:text-violet-300">{(rFreq && rC ? (1 / (2 * Math.PI * rFreq * (rC/1e6))) : 0).toFixed(2)} Ω</div></div>
+                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Inductive Reactance (XL)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{(2 * Math.PI * rFreq * (rL/1000)).toFixed(2)} Ω</div></div>
+                      <div><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Capacitive Reactance (XC)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{(rFreq && rC ? (1 / (2 * Math.PI * rFreq * (rC/1e6))) : 0).toFixed(2)} Ω</div></div>
                     </div>
                  </div>
               </Widget>
@@ -599,9 +638,9 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Feedback Resistor (Rf) kΩ</label><input type="number" value={opRf} onChange={e=>setOpRf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Input Resistor (Rin) kΩ</label><input type="number" value={opRin} onChange={e=>setOpRin(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-slate-800 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-white shadow-xl">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Inverting Gain</div><div className="text-4xl font-mono font-bold">-{opRin ? (opRf / opRin).toFixed(2) : 0}</div></div>
-                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Non-Inverting Gain</div><div className="text-4xl font-mono font-bold">+{opRin ? (1 + (opRf / opRin)).toFixed(2) : 0}</div></div>
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Inverting Gain</div><div className="text-4xl font-mono font-bold">-{opRin ? (opRf / opRin).toFixed(2) : 0}</div></div>
+                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Non-Inverting Gain</div><div className="text-4xl font-mono font-bold">+{opRin ? (1 + (opRf / opRin)).toFixed(2) : 0}</div></div>
                     </div>
                  </div>
               </Widget>
@@ -615,9 +654,9 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">LED Forward Voltage (Vf) V</label><input type="number" value={ledVf} onChange={e=>setLedVf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">LED Forward Current (If) mA</label><input type="number" value={ledIf} onChange={e=>setLedIf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-amber-50 dark:bg-amber-500/10 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-200 dark:border-amber-500/20 shadow-sm">
-                      <div className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-2">Required Resistor</div>
-                      <div className="text-6xl font-mono font-bold text-amber-700 dark:text-amber-400">{ledIf ? ((ledVs - ledVf) / (ledIf / 1000)).toFixed(0) : 0} Ω</div>
+                    <div className="bg-amber-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
+                      <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-2">Required Resistor</div>
+                      <div className="text-6xl font-mono font-bold">{(ledIf && (ledVs > ledVf)) ? ((ledVs - ledVf) / (ledIf / 1000)).toFixed(0) : 0} Ω</div>
                     </div>
                  </div>
               </Widget>
@@ -630,9 +669,9 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Voltage (V)</label><input type="number" value={pwrV} onChange={e=>setPwrV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Current (I)</label><input type="number" value={pwrI} onChange={e=>setPwrI(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-slate-800 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-white shadow-xl">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Power (P = V×I)</div><div className="text-5xl font-mono font-bold">{(pwrV * pwrI).toFixed(2)} W</div></div>
-                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Resistance (R = V/I)</div><div className="text-3xl font-mono font-bold">{pwrI ? (pwrV / pwrI).toFixed(2) : 0} Ω</div></div>
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Power (P = V×I)</div><div className="text-5xl font-mono font-bold">{(pwrV * pwrI).toFixed(2)} W</div></div>
+                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Resistance (R = V/I)</div><div className="text-3xl font-mono font-bold">{pwrI ? (pwrV / pwrI).toFixed(2) : 0} Ω</div></div>
                     </div>
                  </div>
               </Widget>
@@ -645,9 +684,9 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Input Value</label><input type="number" value={dbV1} onChange={e=>setDbV1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Output Value</label><input type="number" value={dbV2} onChange={e=>setDbV2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm">
-                      <div className="mb-6"><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-200">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
-                      <div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-200">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
+                    <div className="bg-slate-100 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm text-slate-800 dark:text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
+                      <div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
                     </div>
                  </div>
               </Widget>
@@ -659,9 +698,9 @@
                     <div className="space-y-4">
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Frequency (MHz)</label><input type="number" value={waveF} onChange={e=>setWaveF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-violet-500/10 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-violet-500/20 shadow-sm">
+                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
                       <div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">Wavelength (c/f)</div>
-                      <div className="text-6xl font-mono font-bold text-violet-800 dark:text-violet-300">{waveF ? (299.792 / waveF).toFixed(4) : 0} m</div>
+                      <div className="text-6xl font-mono font-bold">{(waveF && waveF > 0) ? (299.792 / waveF).toFixed(4) : 0} m</div>
                     </div>
                  </div>
               </Widget>
@@ -678,9 +717,9 @@
                         </select>
                       </div>
                     </div>
-                    <div className="bg-slate-800 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-white shadow-xl">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Diameter</div><div className="text-4xl font-mono font-bold">{awgData.dia} mm</div></div>
-                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Resistance</div><div className="text-4xl font-mono font-bold">{awgData.res} Ω/km</div></div>
+                    <div className="bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Diameter</div><div className="text-4xl font-mono font-bold">{awgData.dia} mm</div></div>
+                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Resistance</div><div className="text-4xl font-mono font-bold">{awgData.res} Ω/km</div></div>
                     </div>
                  </div>
               </Widget>
@@ -693,9 +732,25 @@
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Current (Amps)</label><input type="number" value={tCurr} onChange={e=>setTCurr(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
                       <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Temp Rise (°C)</label><input type="number" value={tThick} onChange={e=>setTThick(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" placeholder="e.g. 10" /></div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-violet-500/10 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-violet-500/20 shadow-sm">
+                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
                       <div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">Estimated Trace Width</div>
-                      <div className="text-6xl font-mono font-bold text-violet-800 dark:text-violet-300">{tCurr && tThick ? ((tCurr / (0.048 * Math.pow(tThick, 0.44))) ** (1/0.725) / 1.378).toFixed(2) : 0} mm</div>
+                      <div className="text-6xl font-mono font-bold">{tCurr && tThick ? ((tCurr / (0.048 * Math.pow(tThick, 0.44))) ** (1/0.725) / 1.378).toFixed(2) : 0} mm</div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'timer555' && (
+              <Widget title="555 Timer Calculator (Astable)" icon={Clock}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Resistor R1 (kΩ)</label><input type="number" value={t5R1} onChange={e=>setT5R1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Resistor R2 (kΩ)</label><input type="number" value={t5R2} onChange={e=>setT5R2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Capacitor C (µF)</label><input type="number" value={t5C} onChange={e=>setT5C(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                    </div>
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Frequency (f)</div><div className="text-4xl font-mono font-bold">{t5Freq.toFixed(2)} Hz</div></div>
+                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Duty Cycle (D)</div><div className="text-4xl font-mono font-bold">{t5Duty.toFixed(1)} %</div></div>
                     </div>
                  </div>
               </Widget>
@@ -770,7 +825,7 @@
       return (
         <Widget title="Alternating Current Waves" icon={Monitor}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-950 border-4 border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
+            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-100 dark:bg-slate-950 border-4 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
               <div className="absolute inset-0 cro-grid opacity-60"></div>
               <div className="absolute top-1/2 left-0 w-full h-px bg-sky-500/50"></div>
               <div className="absolute top-0 left-1/2 w-px h-full bg-sky-500/50"></div>
@@ -779,8 +834,8 @@
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
               </button>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-10 flex items-center tracking-wide"><Zap className="w-5 h-5 mr-3 text-violet-500" /> Signal Control</h4>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Zap className="w-5 h-5 mr-3 text-violet-500" /> Signal Control</h4>
               <div className="space-y-10">
                 <div>
                   <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600 dark:text-violet-400">{chA.amp}V</span></div>
@@ -835,15 +890,15 @@
       return (
         <Widget title="Half-Wave Rectifier Waveforms" icon={Activity}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-950 border-4 border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
+            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-100 dark:bg-slate-950 border-4 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
               <div className="absolute top-1/2 left-0 w-full h-px bg-violet-500/50"></div>
               <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10" />
               <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-violet-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
               </button>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-violet-500" /> AC Input Source</h4>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-violet-500" /> AC Input Source</h4>
               <div className="space-y-10">
                 <div>
                   <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600 dark:text-violet-400">{chA.amp}V</span></div>
@@ -877,7 +932,7 @@
       return (
         <Widget title="Zener Diode Breakdown" icon={Activity}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Breakdown Voltage (Vz)</span> <span className="text-violet-600 dark:text-violet-400">{vz.toFixed(1)} V</span></div>
                     <input type="range" min="2" max="9" step="0.5" value={vz} onChange={e => setVz(Number(e.target.value))} className="text-violet-500" />
@@ -891,12 +946,12 @@
                     <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <line x1="100" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <text x="100" y="-3" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">V (-10 to 0)</text>
-                  <text x="106" y="100" fill="currentColor" fontSize="4" textAnchor="start" className="font-mono text-slate-400 font-bold">Iz (-mA)</text>
+                  <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <line x1="100" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <text x="100" y="-3" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">V (-10 to 0)</text>
+                  <text x="106" y="100" fill="currentColor" fontSize="4" textAnchor="start" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Iz (-mA)</text>
                   <path d={buildPath()} fill="none" stroke="#8B5CF6" strokeWidth="2.5" />
                   <circle cx={(vin+10)*10} cy={100 - (currentI/-50)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
                 </svg>
@@ -914,7 +969,7 @@
       return (
         <Widget title="Ohm's Law Verification" icon={Zap}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Voltage (V)</span> <span className="text-violet-600 dark:text-violet-400">{v.toFixed(1)} V</span></div>
                     <input type="range" min="0" max="20" step="1" value={v} onChange={e => setV(Number(e.target.value))} className="text-violet-500" />
@@ -928,12 +983,12 @@
                     <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{i.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">V (Volts)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">I (mA)</text>
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">V (Volts)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">I (mA)</text>
                   <path d={`M 0,100 L 100,${100 - (20/r)*5}`} fill="none" stroke="#10B981" strokeWidth="2.5" />
                   <circle cx={(v/20)*100} cy={100 - (i/20)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
                   <line x1={(v/20)*100} y1="100" x2={(v/20)*100} y2={100 - (i/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
@@ -963,7 +1018,7 @@
       return (
         <Widget title="RC Low Pass Filter Bode Plot" icon={Radio}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Resistance (R)</span> <span className="text-violet-600 dark:text-violet-400">{r.toFixed(1)} kΩ</span></div>
                     <input type="range" min="0.1" max="10" step="0.1" value={r} onChange={e => setR(Number(e.target.value))} className="text-violet-500" />
@@ -977,12 +1032,12 @@
                     <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{fc.toFixed(1)} <span className="text-lg opacity-50">Hz</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Log(Freq)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Gain (dB)</text>
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Log(Freq)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Gain (dB)</text>
                   <path d={buildPath()} fill="none" stroke="#F97316" strokeWidth="2.5" />
                 </svg>
               </div>
@@ -1012,7 +1067,7 @@
       return (
         <Widget title="Series RLC Resonance Curve" icon={Globe}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Inductance (L)</span> <span className="text-violet-600 dark:text-violet-400">{l.toFixed(1)} mH</span></div>
                     <input type="range" min="1" max="50" step="1" value={l} onChange={e => setL(Number(e.target.value))} className="text-violet-500" />
@@ -1026,12 +1081,12 @@
                     <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{fr.toFixed(0)} <span className="text-lg opacity-50">Hz</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Freq (Hz)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Current (I)</text>
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Freq (Hz)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Current (I)</text>
                   <path d={buildPath()} fill="none" stroke="#EAB308" strokeWidth="2.5" />
                   <line x1={(fr/2000)*100} y1="100" x2={(fr/2000)*100} y2="0" stroke="#ef4444" strokeWidth="0.5" strokeDasharray="2 2" />
                 </svg>
@@ -1056,7 +1111,7 @@
       return (
         <Widget title="Diode Forward Bias" icon={Activity}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Forward Voltage (Vd)</span> <span className="text-violet-600 dark:text-violet-400">{vd.toFixed(2)} V</span></div>
                     <input type="range" min="0" max="1" step="0.05" value={vd} onChange={e => setVd(Number(e.target.value))} className="text-violet-500" />
@@ -1066,12 +1121,12 @@
                     <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Vd (V)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Id (mA)</text>
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Vd (V)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Id (mA)</text>
                   <path d={buildPath()} fill="none" stroke="#3b82f6" strokeWidth="2.5" />
                   <circle cx={vd*100} cy={100 - (currentI/20)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
                   <line x1={vd*100} y1="100" x2={vd*100} y2={100 - (currentI/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
@@ -1100,7 +1155,7 @@
       return (
         <Widget title="Digital Boolean Logic" icon={GitBranch}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="flex flex-col justify-center items-center py-12 px-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl relative overflow-hidden">
+            <div className="flex flex-col justify-center items-center py-12 px-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl relative overflow-hidden shadow-sm">
               <div className="absolute top-6 right-6 flex space-x-3 z-20">
                 <button onClick={removeInput} disabled={inputs.length <= 2} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-600 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">-</span></button>
                 <button onClick={addInput} disabled={inputs.length >= 5} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-600 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">+</span></button>
@@ -1108,22 +1163,22 @@
               <div className="flex flex-wrap justify-center gap-6 mb-8 mt-10 z-10">
                 {inputs.map((val, idx) => (
                   <div key={idx} className="flex flex-col items-center space-y-4">
-                    <button onClick={() => toggleInput(idx)} className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] flex items-center justify-center text-4xl sm:text-5xl font-mono font-bold transition-all duration-300 shadow-xl ${val === 1 ? 'border-violet-500 bg-violet-500 text-white shadow-violet-500/40 scale-110' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400 hover:border-violet-300 dark:hover:border-violet-600'}`}>{val}</button>
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-white/80 dark:bg-slate-800/80 px-3 py-1 rounded-full backdrop-blur-md">In {inputLabels[idx]}</span>
+                    <button onClick={() => toggleInput(idx)} className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] flex items-center justify-center text-4xl sm:text-5xl font-mono font-bold transition-all duration-300 shadow-xl ${val === 1 ? 'border-violet-500 bg-violet-500 text-white shadow-violet-500/40 scale-110' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-violet-300 dark:hover:border-violet-600'}`}>{val}</button>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest bg-white/80 dark:bg-slate-800/80 px-3 py-1 rounded-full backdrop-blur-md border border-slate-200 dark:border-slate-700">In {inputLabels[idx]}</span>
                   </div>
                 ))}
               </div>
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse border px-4 py-1.5 border-slate-200 dark:border-slate-700 rounded-full bg-white dark:bg-slate-800 z-10">Click Nodes To Toggle</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse border px-4 py-1.5 border-slate-300 dark:border-slate-700 rounded-full bg-white dark:bg-slate-800 z-10">Click Nodes To Toggle</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { name: 'AND', val: calcAND, color: 'text-blue-500', bg: 'bg-blue-500' }, { name: 'OR', val: calcOR, color: 'text-emerald-500', bg: 'bg-emerald-500' },
-                { name: 'NAND', val: calcNAND, color: 'text-rose-500', bg: 'bg-rose-500' }, { name: 'NOR', val: calcNOR, color: 'text-amber-500', bg: 'bg-amber-500' },
-                { name: 'XOR', val: calcXOR, color: 'text-purple-500', bg: 'bg-purple-500' }, { name: 'XNOR', val: calcXNOR, color: 'text-cyan-500', bg: 'bg-cyan-500' }
+                { name: 'AND', val: calcAND, color: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-500' }, { name: 'OR', val: calcOR, color: 'text-emerald-600 dark:text-emerald-500', bg: 'bg-emerald-500' },
+                { name: 'NAND', val: calcNAND, color: 'text-rose-600 dark:text-rose-500', bg: 'bg-rose-500' }, { name: 'NOR', val: calcNOR, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500' },
+                { name: 'XOR', val: calcXOR, color: 'text-purple-600 dark:text-purple-500', bg: 'bg-purple-500' }, { name: 'XNOR', val: calcXNOR, color: 'text-cyan-600 dark:text-cyan-500', bg: 'bg-cyan-500' }
               ].map(gate => (
-                <div key={gate.name} className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-3xl group hover:border-violet-400 dark:hover:border-violet-600 transition-colors duration-300">
+                <div key={gate.name} className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-3xl group hover:border-violet-300 dark:hover:border-violet-600 transition-colors duration-300 shadow-sm">
                   <span className={`font-bold tracking-widest uppercase mb-4 ${gate.color}`}>{gate.name}</span>
-                  <span className={`w-14 h-14 flex items-center justify-center rounded-2xl text-2xl font-mono transition-all duration-300 shadow-lg ${gate.val === 1 ? `${gate.bg} text-white scale-110` : 'bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-600'}`}>{gate.val}</span>
+                  <span className={`w-14 h-14 flex items-center justify-center rounded-2xl text-2xl font-mono transition-all duration-300 shadow-lg border border-slate-200 dark:border-slate-700 ${gate.val === 1 ? `${gate.bg} text-white scale-110 border-none` : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>{gate.val}</span>
                 </div>
               ))}
             </div>
@@ -1150,7 +1205,7 @@
                     <div key={subj.code} className="flex justify-between items-center py-3 px-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-colors">
                       <div className="text-sm flex flex-col sm:flex-row sm:items-center">
                         <span className="font-bold text-slate-800 dark:text-slate-200 sm:mr-4">{subj.code}</span> 
-                        <span className="text-slate-500 text-xs font-medium">{subj.name}</span>
+                        <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">{subj.name}</span>
                       </div>
                       <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-5 text-base font-bold outline-none cursor-pointer focus:border-violet-500 transition-colors shadow-sm text-slate-800 dark:text-slate-200" value={grades[subj.code]} onChange={(e) => setGrades({...grades, [subj.code]: e.target.value})}>
                         {Object.keys(GRADES).map(g => <option key={g} value={g}>{g}</option>)}
@@ -1179,15 +1234,15 @@
                 <User className="w-3.5 h-3.5" /><span>Created By</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-800 dark:text-white">{APP_CONFIG.creator}</h2>
-              <p className="text-lg font-medium text-slate-500 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-400" /> {APP_CONFIG.course}</p>
-              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 mb-8">
-                <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300 font-medium">
+              <p className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-500 dark:text-slate-400" /> {APP_CONFIG.course}</p>
+              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 mb-8">
+                <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
                   This project was prepared as part of the mini-project for our first-year <strong>EE & IPR</strong> subject. Designed explicitly for the {APP_CONFIG.university} syllabus, this acts as a comprehensive academic companion.
                 </p>
               </div>
             </div>
-            <div className="relative z-10 pt-8 border-t border-slate-100 dark:border-slate-800">
-              <a href={`mailto:${APP_CONFIG.email}`} className="inline-flex items-center space-x-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-violet-600 transition-colors">
+            <div className="relative z-10 pt-8 border-t border-slate-200 dark:border-slate-800">
+              <a href={`mailto:${APP_CONFIG.email}`} className="inline-flex items-center space-x-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-violet-600 transition-colors">
                 <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"><Mail className="w-4 h-4" /></div><span>{APP_CONFIG.email}</span>
               </a>
             </div>
@@ -1196,27 +1251,27 @@
           <Widget title="System Settings" icon={Settings}>
             <div className="space-y-10 flex flex-col h-full">
               <div className="flex-grow">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">UI Theme Option</h4>
+                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-5">UI Theme Option</h4>
                 <div className="grid grid-cols-1 gap-4">
                   {[
                     { id: 'dark', label: 'Deep Slate', icon: Moon },
                     { id: 'light', label: 'Soft Ivory', icon: Sun },
                     { id: 'nothing', label: 'Matrix Grid', icon: Layers }
                   ].map(t => (
-                    <button key={t.id} onClick={() => dispatch({ type: 'SET_THEME', payload: t.id })} className={`flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all duration-300 ${state.theme === t.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold shadow-sm' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-violet-300 dark:hover:bg-slate-900'}`}>
+                    <button key={t.id} onClick={() => dispatch({ type: 'SET_THEME', payload: t.id })} className={`flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all duration-300 ${state.theme === t.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold shadow-sm' : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-violet-300 dark:hover:bg-slate-900'}`}>
                       <t.icon className="w-5 h-5" /><span className="text-sm uppercase tracking-wider">{t.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
               <div className="pt-8 border-t border-slate-200 dark:border-slate-800">
-                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Performance</h4>
+                 <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-5">Performance</h4>
                  <label className="flex items-center justify-between p-5 border-2 border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group">
                   <div className="flex items-center space-x-4">
-                    <Activity className="w-5 h-5 text-slate-500 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
-                    <div className="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Animations Enabled</div>
+                    <Activity className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                    <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Animations Enabled</div>
                   </div>
-                  <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${state.animations ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                  <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 shadow-inner ${state.animations ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                        onClick={() => dispatch({ type: 'TOGGLE_ANIMATIONS' })}>
                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${state.animations ? 'left-7' : 'left-1'}`}></div>
                   </div>
@@ -1284,50 +1339,45 @@
 
           <div className={`fixed inset-0 bg-slate-900/30 backdrop-blur-md z-40 transition-all duration-500 ${state.isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}></div>
 
-          <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border-r border-slate-200/50 dark:border-slate-800/50 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-2xl ${state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-            <div className="p-6 md:p-8 flex justify-between items-center border-b border-slate-100 dark:border-slate-800/50">
+          <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border-r border-slate-200/80 dark:border-slate-800/80 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-2xl ${state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className="p-6 md:p-8 flex justify-between items-center border-b border-slate-200/80 dark:border-slate-800/80">
                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center font-bold font-sans text-xl shadow-lg shadow-violet-500/30">NX</div>
                   <div className="flex flex-col">
-                    <span className="font-bold tracking-widest uppercase text-base text-slate-800 dark:text-white leading-none">ECE Hub</span>
+                    <span className="font-bold tracking-widest uppercase text-lg text-slate-800 dark:text-white leading-none">ECE Hub</span>
                   </div>
                </div>
                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-2.5 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
             </div>
 
             <div className="flex-grow py-8 px-6 space-y-2 overflow-y-auto">
-              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-6">Menu Options</div>
+              <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest px-4 mb-6">Menu Options</div>
               {TABS.map(tab => (
-                <button key={tab.id} onClick={() => dispatch({ type: 'SET_TAB', payload: tab.id })} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${state.activeTab === tab.id ? 'bg-violet-50 dark:bg-violet-500/10 border-violet-100 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 shadow-sm translate-x-2' : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-800 dark:hover:text-slate-200'}`}>
+                <button key={tab.id} onClick={() => dispatch({ type: 'SET_TAB', payload: tab.id })} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${state.activeTab === tab.id ? 'bg-violet-50 dark:bg-violet-500/10 border-violet-100 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 shadow-sm translate-x-2' : 'bg-transparent border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-800 dark:hover:text-slate-200'}`}>
                   <div className="flex items-center space-x-4"><tab.icon className="w-5 h-5" /><span>{tab.label}</span></div>
                   {state.activeTab === tab.id && <ChevronRight className="w-4 h-4" />}
                 </button>
               ))}
             </div>
 
-            <div className="p-8 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-8 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
                <div className="flex flex-col">
-                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Created By</div>
-                 <div className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{APP_CONFIG.creator}</div>
+                 <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Created By</div>
+                 <div className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">{APP_CONFIG.creator}</div>
                </div>
             </div>
           </aside>
 
-          <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/60 dark:bg-slate-950/60 border-b border-slate-200/50 dark:border-slate-800/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none">
+          <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/60 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-20 flex items-center justify-between">
               <div className="flex items-center space-x-5">
-                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-3 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl hover:shadow-sm transition-all active:scale-95 text-slate-600 dark:text-slate-300"><Menu className="w-5 h-5" /></button>
-                <div className="hidden sm:flex flex-col border-l-2 border-slate-200 dark:border-slate-800 pl-5">
+                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl hover:shadow-sm transition-all active:scale-95 text-slate-600 dark:text-slate-300"><Menu className="w-5 h-5" /></button>
+                <div className="hidden sm:flex flex-col border-l-2 border-slate-200 dark:border-slate-700 pl-5">
                   <span className="font-bold tracking-[0.2em] uppercase text-base text-slate-800 dark:text-white leading-none">{APP_CONFIG.name}</span>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase mt-2 leading-none tracking-widest">{APP_CONFIG.university}</span>
+                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mt-2 leading-none tracking-widest">{APP_CONFIG.university}</span>
                 </div>
               </div>
               <div className="flex items-center space-x-5">
-                <span className="hidden md:inline text-xs font-bold uppercase tracking-widest text-slate-500">{TABS.find(t => t.id === state.activeTab).label}</span>
-                <div className="flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800/50 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-blink"></span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">System Online</span>
-                </div>
+                <span className="hidden md:inline text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">{TABS.find(t => t.id === state.activeTab).label}</span>
               </div>
             </div>
           </header>
