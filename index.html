@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ECE Tools Hub - KTU Companion</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+  
+  <script src="https://unpkg.com/lucide-react@0.292.0/dist/umd/lucide-react.min.js"></script>
+
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      document.body.innerHTML = `
+        <div style="padding: 40px; font-family: monospace; color: #ef4444; background: #fee2e2; min-height: 100vh;">
+          <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">CRITICAL SYSTEM ERROR</h2>
+          <p style="margin-bottom: 8px;"><b>Message:</b> ${message}</p>
+          <p style="margin-bottom: 8px;"><b>Line:</b> ${lineno}:${colno}</p>
+          <p>This means a CDN failed to load or there is a syntax error. Please take a screenshot of this and send it back to the AI!</p>
+        </div>
+      `;
+    };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@100;400;700&display=swap');
+
+    :root { --font-sans: 'Outfit', sans-serif; --font-mono: 'JetBrains Mono', monospace; }
+    body { font-family: var(--font-sans); overflow-x: hidden; background-color: #FAFAFA; color: #334155; transition: background-color 0.4s ease, color 0.4s ease; -webkit-font-smoothing: antialiased; }
+    body.dark { background-color: #0B0F19; color: #F8FAFC; }
+    .font-mono { font-family: var(--font-mono) !important; }
+
+    .bg-ambient-light { background: radial-gradient(at 0% 0%, rgba(238, 242, 255, 1) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(255, 241, 242, 1) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(240, 253, 250, 1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(250, 245, 255, 1) 0px, transparent 50%), #FFFFFF; }
+    .bg-ambient-dark { background: radial-gradient(at 0% 0%, rgba(30, 27, 75, 1) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(76, 29, 149, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(15, 118, 110, 0.2) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(23, 37, 84, 0.5) 0px, transparent 50%), #020617; }
+    .cro-grid { background-image: linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px); background-size: 40px 40px; background-position: center center; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+    
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]:focus { outline: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border: 4px solid white; border-radius: 50%; background: currentColor; cursor: pointer; margin-top: -9px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .dark input[type=range]::-webkit-slider-thumb { border-color: #1E293B; }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .animate-float { animation: float 5s ease-in-out infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .animate-blink { animation: blink 2s ease-in-out infinite; }
+
+    .news-content p { margin-bottom: 1.2rem; line-height: 1.8; color: inherit; }
+    .news-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 1.5rem 0; max-height: 400px; object-fit: cover; }
+    .news-content a { text-decoration: none; color: #8B5CF6; font-weight: 500; transition: color 0.2s; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    // 1. Safe extraction of React hooks
+    const { useState, useEffect, useReducer, useRef, useMemo } = React;
+    
+    // 2. Safe extraction of Icons (Prevent White Screen if CDN fails)
+    if (!window.lucideReact) {
+      throw new Error("Lucide Icons CDN failed to load. The network might be blocking it.");
+    }
+    const { 
+      Activity, Calculator, Settings, Play, Pause, RotateCcw,
+      Zap, Cpu, Hash, Layers, Sun, Moon, Terminal,
+      GraduationCap, Clock, Monitor, User, Menu, X, CheckCircle, Circle, 
+      ListTodo, Code, ChevronRight, GitBranch, Radio, Globe, 
+      ArrowLeft, ExternalLink, Sliders, Database, RefreshCw, 
+      Mail, Calendar
+    } = window.lucideReact;
+
+    // ==========================================
+    // CONFIGURATION
+    // ==========================================
+    const APP_CONFIG = {
+      name: "ECE Tools Hub",
+      version: "v4.0",
+      creator: "Jiyon Sebastian",
+      course: "First Year B.Tech ECE",
+      university: "Kerala Technological University (KTU)",
+      project: "EE & IPR Mini-Project",
+      email: "jiyonjewel1019@gmail.com"
+    };
+
+    const KTU_SUBJECTS = [
+      { code: "MAT101", name: "Linear Algebra & Calculus", credits: 4 },
+      { code: "PHT100", name: "Engineering Physics", credits: 4 },
+      { code: "CYT100", name: "Engineering Chemistry", credits: 4 },
+      { code: "EST130", name: "Basics of EEE", credits: 4 },
+      { code: "EST110", name: "Engineering Graphics", credits: 3 },
+      { code: "EST120", name: "Basics of Civil & Mech", credits: 4 },
+      { code: "HUN101", name: "Life Skills", credits: 2 },
+    ];
+
+    const GRADES = { 'S': 10, 'A+': 9, 'A': 8.5, 'B+': 8, 'B': 7.5, 'C+': 7, 'C': 6.5, 'D': 6, 'P': 5.5, 'F': 0 };
+
+    const RESISTOR_COLORS = [
+      { name: 'Black', val: 0, mult: 1, hex: '#1E293B', text: '#fff' },
+      { name: 'Brown', val: 1, mult: 10, hex: '#92400E', text: '#fff' },
+      { name: 'Red', val: 2, mult: 100, hex: '#EF4444', text: '#fff' },
+      { name: 'Orange', val: 3, mult: 1000, hex: '#F97316', text: '#fff' },
+      { name: 'Yellow', val: 4, mult: 10000, hex: '#EAB308', text: '#000' },
+      { name: 'Green', val: 5, mult: 100000, hex: '#22C55E', text: '#fff' },
+      { name: 'Blue', val: 6, mult: 1000000, hex: '#3B82F6', text: '#fff' },
+      { name: 'Violet', val: 7, mult: 10000000, hex: '#8B5CF6', text: '#fff' },
+      { name: 'Gray', val: 8, mult: 100000000, hex: '#64748B', text: '#fff' },
+      { name: 'White', val: 9, mult: 1000000000, hex: '#F8FAFC', text: '#000' },
+    ];
+
+    const AWG_DATA = [
+      { awg: 10, dia: 2.588, res: 3.277 }, { awg: 12, dia: 2.053, res: 5.211 },
+      { awg: 14, dia: 1.628, res: 8.286 }, { awg: 16, dia: 1.291, res: 13.17 },
+      { awg: 18, dia: 1.024, res: 20.95 }, { awg: 20, dia: 0.812, res: 33.31 },
+      { awg: 22, dia: 0.645, res: 52.96 }, { awg: 24, dia: 0.511, res: 84.22 }
+    ];
+
+    const stripHTML = (html) => html ? html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : "No content available.";
+    const extractSnippet = (html) => stripHTML(html).length > 120 ? stripHTML(html).substring(0, 120) + "..." : stripHTML(html);
+
+    const FALLBACK_NEWS = [
+      {
+        title: "TSMC Begins 2nm Silicon Production Trials for Next-Gen SoC",
+        categories: ["VLSI"], pubDate: new Date().toISOString(),
+        description: "Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node...",
+        content: "<p>Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node. This represents a monumental leap in VLSI (Very Large Scale Integration) design, pushing the boundaries of Moore's Law further than previously thought possible.</p><p>Implementing Gate-All-Around (GAA) FETs instead of traditional FinFETs promises to drastically reduce power consumption while increasing computational density. By wrapping the gate entirely around the channel, engineers can significantly reduce short-channel effects and leakage current.</p>",
+        link: "https://www.eetimes.com/"
+      },
+      {
+        title: "IEEE Ratifies New 6G Spectrum Guidelines Focusing on THz Bands",
+        categories: ["TELECOM"], pubDate: new Date(Date.now() - 3600000).toISOString(), 
+        description: "The IEEE standard body has released its preliminary guidelines for 6G telecommunications, heavily exploring the Terahertz spectrum...",
+        content: "<p>The IEEE standard body has released its preliminary guidelines for 6G telecommunications. Moving beyond the millimeter-wave frequencies used in 5G, the new standards heavily explore the Terahertz (THz) spectrum, operating between 100 GHz and 10 THz.</p><p>This ultra-high frequency band is expected to deliver microsecond latency and terabit-per-second data rates, opening doors for true holographic communications, advanced remote robotics, and immersive augmented reality.</p>",
+        link: "https://www.eetimes.com/"
+      },
+      {
+        title: "KTU Announces Updated Embedded Systems Curriculum",
+        categories: ["ACADEMIC"], pubDate: new Date(Date.now() - 7200000).toISOString(),
+        description: "Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum with heavier emphasis on modern IoT...",
+        content: "<p>Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum. The new syllabus places a heavier emphasis on modern IoT frameworks, Edge AI processing, and real-time operating systems (RTOS), ensuring students are equipped for Industry 4.0.</p><p>The university plans to phase out legacy 8-bit microcontrollers (like the 8051) in the core lab modules in favor of 32-bit ARM Cortex-M based architectures.</p>",
+        link: "https://ktu.edu.in/"
+      }
+    ];
+
+    // ==========================================
+    // COMPONENT WRAPPER
+    // ==========================================
+    const Widget = ({ title, icon: Icon, children, className = "", noPadding = false, onClick }) => (
+      <div 
+        onClick={onClick}
+        className={`relative bg-white/80 dark:bg-slate-900/50 backdrop-blur-3xl border border-slate-200/60 dark:border-slate-800/60 rounded-3xl transition-all duration-300 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col h-full ${noPadding ? '' : 'p-6 md:p-8'} ${onClick ? 'cursor-pointer hover:-translate-y-1' : ''} ${className}`}
+      >
+        {!noPadding && title && (
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/50">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-2xl group-hover:bg-violet-600 group-hover:text-white transition-colors duration-300">
+                {Icon && <Icon className="w-5 h-5" />}
+              </div>
+              <h3 className="font-semibold text-sm tracking-wide text-slate-800 dark:text-slate-200">
+                {title}
+              </h3>
+            </div>
+          </div>
+        )}
+        <div className={`relative z-10 flex-grow ${noPadding ? 'h-full flex flex-col' : ''}`}>{children}</div>
+      </div>
+    );
+
+    // ==========================================
+    // APP MODULES
+    // ==========================================
+
+    // --- TIMETABLE ---
+    const TimetableView = ({ showToast }) => {
+      const defaultSchedule = {
+        Monday: ['MAT101', 'EST130', 'Lab', 'Lab'], Tuesday: ['PHT100', 'EST110', 'CYT100', 'Library'],
+        Wednesday: ['EST130', 'EST120', 'MAT101', 'HUN101'], Thursday: ['EST110', 'PHT100', 'EST120', 'Sports'],
+        Friday: ['CYT100', 'MAT101', 'EST130 Lab', 'EST130 Lab'],
+      };
+      const [schedule, setSchedule] = useState(() => {
+        try { const saved = localStorage.getItem('ece_timetable'); return saved ? JSON.parse(saved) : defaultSchedule; } catch(e) { return defaultSchedule; }
+      });
+      const updatePeriod = (day, index, val) => {
+        const newDay = [...schedule[day]]; newDay[index] = val; setSchedule({...schedule, [day]: newDay});
+      };
+      const saveTimetable = () => { localStorage.setItem('ece_timetable', JSON.stringify(schedule)); showToast("Timetable saved locally."); };
+
+      return (
+        <div className="animate-in fade-in duration-700">
+          <Widget title="Weekly Schedule" icon={Calendar}>
+            <div className="overflow-x-auto pb-4">
+              <div className="min-w-[700px]">
+                <div className="grid grid-cols-5 gap-4 mb-4">
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400 pl-24">Period 1</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400">Period 2</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400">Period 3</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400">Period 4</div>
+                  <div className="text-right">
+                    <button onClick={saveTimetable} className="bg-violet-500 hover:bg-violet-600 text-white px-5 py-2 rounded-xl text-xs font-bold tracking-widest uppercase shadow-md transition-colors">Save</button>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {Object.keys(schedule).map(day => (
+                    <div key={day} className="flex items-center space-x-4 bg-slate-50/50 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50 transition-colors">
+                      <div className="w-20 font-bold text-sm text-slate-700 dark:text-slate-300 tracking-wider">{day}</div>
+                      {schedule[day].map((period, i) => (
+                        <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold outline-none focus:border-violet-400 transition-all text-center placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder="Free" />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Widget>
+        </div>
+      );
+    };
+
+    // --- NEWS FEED ---
+    const NewsHubView = ({ showToast }) => {
+      const [news, setNews] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [isLive, setIsLive] = useState(false);
+      const [activeArticle, setActiveArticle] = useState(null);
+      const [lastSync, setLastSync] = useState(new Date());
+
+      useEffect(() => {
+        let isMounted = true;
+        const fetchNews = async () => {
+          if (isMounted && news.length === 0) setLoading(true); 
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000); 
+            const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.eetimes.com/feed/', { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (!response.ok) throw new Error("Network error");
+            const data = await response.json();
+            if (isMounted) {
+              if (data?.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
+                setNews(data.items.slice(0, 9)); setIsLive(true); setLastSync(new Date());
+              } else throw new Error("Data parsing error");
+            }
+          } catch (err) {
+            if (isMounted) { setNews(FALLBACK_NEWS); setIsLive(false); setLastSync(new Date()); }
+          } finally {
+            if (isMounted) setLoading(false);
+          }
+        };
+        fetchNews();
+        const intervalId = setInterval(fetchNews, 600000); 
+        return () => { isMounted = false; clearInterval(intervalId); };
+      }, [news.length]);
+
+      if (activeArticle) {
+        const articleBody = activeArticle.content && activeArticle.content.length > 50 ? activeArticle.content : activeArticle.description || "No content available.";
+        return (
+          <div className="animate-in fade-in duration-500 h-full flex flex-col relative z-20">
+            <button onClick={() => setActiveArticle(null)} className="flex items-center space-x-2 text-sm font-medium text-slate-500 hover:text-violet-600 dark:hover:text-violet-400 mb-6 group w-fit bg-white/80 dark:bg-slate-900/60 px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-sm transition-all">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /><span>Back to Feed</span>
+            </button>
+            <div className="flex-grow max-w-4xl mx-auto w-full bg-white/90 dark:bg-slate-900/80 backdrop-blur-3xl border border-slate-200/50 dark:border-slate-800/50 rounded-[2.5rem] shadow-xl overflow-hidden">
+              <div className="p-8 md:p-12 flex flex-col h-full">
+                <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
+                  <span className="bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">{activeArticle.categories?.[0] || 'UPDATE'}</span>
+                  <span className="text-sm font-medium text-slate-500 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-900 dark:text-white">{activeArticle.title || "Untitled"}</h2>
+                <div className="news-content flex-grow text-lg text-slate-600 dark:text-slate-300 font-sans" dangerouslySetInnerHTML={{ __html: articleBody }} />
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="animate-in fade-in duration-700 h-full flex flex-col">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-slate-200/60 dark:border-slate-800/60 pb-6 gap-4">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Tech News Feed</h2>
+              <div className="flex items-center space-x-3 mt-2 text-slate-500">
+                <p className="text-sm font-medium">Industry Updates</p><span className="opacity-50">•</span>
+                <p className="text-xs font-mono flex items-center"><RefreshCw className="w-3 h-3 mr-1.5 opacity-70" /> Auto-sync</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-start sm:items-end space-y-2">
+              <div className={`flex items-center space-x-2 border px-4 py-2 rounded-full shadow-sm transition-colors ${isLive ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' : 'bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'}`}>
+                {isLive ? <Radio className="w-4 h-4 animate-blink" /> : <Database className="w-4 h-4" />}
+                <span className="text-xs font-bold uppercase tracking-wider">{isLive ? 'Live Feed' : 'Offline Mode'}</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest pl-2 pr-1">Updated: {lastSync.toLocaleTimeString()}</span>
+            </div>
+          </div>
+          {loading ? (
+            <div className="flex-grow flex items-center justify-center">
+              <div className="flex flex-col items-center space-y-6">
+                 <div className="w-12 h-12 border-4 border-slate-100 dark:border-slate-800 border-t-violet-500 dark:border-t-violet-400 rounded-full animate-spin"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
+              {news.map((item, index) => (
+                <div key={index} onClick={() => setActiveArticle(item)} className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-2xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden rounded-3xl group cursor-pointer hover:-translate-y-1 transition-all shadow-sm hover:shadow-lg flex flex-col h-full">
+                   <div className="p-6 md:p-8 flex flex-col h-full justify-between">
+                     <div>
+                       <div className="flex justify-between items-center mb-5">
+                         <span className={`text-xs font-bold tracking-wider px-3 py-1 rounded-full ${index === 0 ? 'bg-violet-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+                           {item.categories?.[0] || 'UPDATE'}
+                         </span>
+                         <span className="text-xs font-medium text-slate-400">{item.pubDate ? new Date(item.pubDate).toLocaleDateString([], {month: 'short', day: 'numeric'}) : ''}</span>
+                       </div>
+                       <h3 className="text-lg font-bold leading-snug text-slate-800 dark:text-slate-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-3">{item.title}</h3>
+                       <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed">{extractSnippet(item.description)}</p>
+                     </div>
+                     <div className="mt-8 pt-5 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between text-violet-500 dark:text-violet-400 font-medium">
+                       <span className="text-sm">Read More</span><ChevronRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
+                     </div>
+                   </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // --- DASHBOARD ---
+    const DashboardView = () => {
+      const [timeLeft, setTimeLeft] = useState(25 * 60);
+      const [isActive, setIsActive] = useState(false);
+      const [tasks, setTasks] = useState(() => {
+        try { const saved = localStorage.getItem('ece_tasks'); return saved ? JSON.parse(saved) : [ { id: '1', text: "Review notes", done: false } ]; } catch(e) { return []; }
+      });
+      const [newTask, setNewTask] = useState("");
+
+      useEffect(() => { localStorage.setItem('ece_tasks', JSON.stringify(tasks)); }, [tasks]);
+      useEffect(() => {
+        let int = null;
+        if (isActive && timeLeft > 0) int = setInterval(() => setTimeLeft(t => t - 1), 1000);
+        else if (timeLeft === 0) setIsActive(false);
+        return () => clearInterval(int);
+      }, [isActive, timeLeft]);
+
+      const toggleTask = (id) => setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+      const addTask = (e) => {
+        if (e.key === 'Enter' && newTask.trim()) { setTasks([{ id: Date.now().toString(), text: newTask, done: false }, ...tasks]); setNewTask(""); }
+      };
+
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-700">
+          <Widget title="Focus Timer" icon={Clock}>
+             <div className="flex flex-col items-center justify-center h-full py-6">
+               <div className="relative w-64 h-64 flex items-center justify-center mb-10 group">
+                 <div className="absolute inset-0 rounded-full bg-violet-50 dark:bg-violet-500/5 group-hover:scale-105 transition-transform duration-500"></div>
+                 <svg className="absolute inset-0 w-full h-full -rotate-90 z-10" viewBox="0 0 100 100">
+                   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-100 dark:text-slate-800" />
+                   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="4" className="text-violet-500 transition-all duration-1000 ease-linear" strokeDasharray="301.59" strokeDashoffset={301.59 - (301.59 * timeLeft) / (25 * 60)} strokeLinecap="round" />
+                 </svg>
+                 <div className="text-6xl font-light font-mono tracking-tighter text-slate-800 dark:text-white z-20">
+                    {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
+                 </div>
+               </div>
+               <div className="flex space-x-4 w-full">
+                 <button onClick={() => setIsActive(!isActive)} className="flex-1 bg-violet-500 hover:bg-violet-600 text-white py-4 rounded-2xl text-sm font-bold tracking-wide active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-violet-500/20">
+                   {isActive ? <Pause className="w-5 h-5 mr-2 fill-current"/> : <Play className="w-5 h-5 mr-2 fill-current"/>} {isActive ? 'Pause' : 'Start'}
+                 </button>
+                 <button onClick={() => {setIsActive(false); setTimeLeft(25*60);}} className="px-6 border-2 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 text-slate-500 rounded-2xl transition-colors flex items-center justify-center bg-white dark:bg-slate-900">
+                   <RotateCcw className="w-5 h-5" />
+                 </button>
+               </div>
+             </div>
+          </Widget>
+
+          <Widget title="Tasks & Assignments" icon={ListTodo}>
+            <div className="flex flex-col h-full">
+              <div className="relative mb-6">
+                <input type="text" placeholder="Add new task... (Press Enter)" value={newTask} onChange={(e) => setNewTask(e.target.value)} onKeyDown={addTask} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-2xl py-4 px-5 text-sm outline-none focus:border-violet-400 transition-all placeholder:text-slate-400" />
+              </div>
+              <div className="space-y-3 overflow-y-auto max-h-[350px] pr-2">
+                {tasks.map(task => (
+                  <div key={task.id} className={`flex items-start space-x-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${task.done ? 'bg-slate-50 border-slate-50 dark:bg-slate-900/30 dark:border-slate-800/30 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/80 shadow-sm hover:shadow-md hover:border-violet-200 dark:hover:border-violet-800'}`} onClick={() => toggleTask(task.id)}>
+                    <button className="mt-0.5 shrink-0 transition-transform hover:scale-110">
+                      {task.done ? <CheckCircle className="w-6 h-6 text-emerald-400" /> : <Circle className="w-6 h-6 text-slate-200 dark:text-slate-700" />}
+                    </button>
+                    <span className={`text-sm leading-relaxed pt-0.5 font-medium ${task.done ? 'line-through text-slate-400' : 'text-slate-700 dark:text-slate-200'}`}>{task.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Widget>
+        </div>
+      );
+    };
+
+    // --- ENGINEERING TOOLS ---
+    const ToolsView = () => {
+      const [activeTool, setActiveTool] = useState('resistor');
+
+      const [bands, setBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[2]]); 
+      const resValue = useMemo(() => (bands[0].val * 10 + bands[1].val) * bands[2].mult, [bands]);
+      const [indBands, setIndBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[1]]); 
+      const indValue = useMemo(() => (indBands[0].val * 10 + indBands[1].val) * indBands[2].mult, [indBands]);
+
+      const formatUnit = (val, unit) => {
+        if (val >= 1e6) return (val / 1e6).toFixed(2) + ' M' + unit;
+        if (val >= 1e3) return (val / 1e3).toFixed(2) + ' k' + unit;
+        return val.toFixed(2) + ' ' + unit;
+      };
+
+      const [bases, setBases] = useState({ dec: '255', bin: '11111111', hex: 'FF' });
+      const updateBases = (val, base) => {
+        if (!val) { setBases({ dec: '', bin: '', hex: '' }); return; }
+        try {
+          const parsed = parseInt(val, base); if (isNaN(parsed)) return;
+          setBases({ dec: parsed.toString(10), bin: parsed.toString(2), hex: parsed.toString(16).toUpperCase() });
+        } catch(e) {}
+      };
+
+      const [rFreq, setRFreq] = useState(50);
+      const [rL, setRL] = useState(10);
+      const [rC, setRC] = useState(10);
+      const [opRf, setOpRf] = useState(10);
+      const [opRin, setOpRin] = useState(1);
+      const [ledVs, setLedVs] = useState(5);
+      const [ledVf, setLedVf] = useState(2);
+      const [ledIf, setLedIf] = useState(20);
+      const [pwrV, setPwrV] = useState(12);
+      const [pwrI, setPwrI] = useState(2);
+      const [dbV1, setDbV1] = useState(1);
+      const [dbV2, setDbV2] = useState(10);
+      const [waveF, setWaveF] = useState(300);
+      const [awgSel, setAwgSel] = useState(20);
+      const awgData = AWG_DATA.find(a => a.awg === Number(awgSel)) || AWG_DATA[0];
+      const [tCurr, setTCurr] = useState(1);
+      const [tThick, setTThick] = useState(1);
+
+      const TOOL_TABS = [
+        { id: 'resistor', label: 'Resistor Decoder', icon: Layers },
+        { id: 'inductor', label: 'Inductor Decoder', icon: Layers },
+        { id: 'base', label: 'Base Converter', icon: Hash },
+        { id: 'reactance', label: 'Reactance Calc', icon: Zap },
+        { id: 'opamp', label: 'Op-Amp Gain', icon: Activity },
+        { id: 'led', label: 'LED Resistor', icon: Sun },
+        { id: 'power', label: 'Power Calculator', icon: Zap },
+        { id: 'db', label: 'Decibel (dB)', icon: Sliders },
+        { id: 'wavelength', label: 'Wavelength', icon: Radio },
+        { id: 'awg', label: 'AWG Lookup', icon: Hash },
+        { id: 'trace', label: 'PCB Trace Width', icon: Terminal },
+      ];
+
+      return (
+        <div className="space-y-6 animate-in fade-in duration-700">
+          <div className="bg-white/80 dark:bg-slate-900/60 p-2 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
+            {TOOL_TABS.map(tab => (
+              <button 
+                key={tab.id} onClick={() => setActiveTool(tab.id)} 
+                className={`flex items-center space-x-2 text-xs font-semibold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${
+                  activeTool === tab.id ? 'bg-violet-500 text-white shadow-md scale-105' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                <tab.icon className="w-3.5 h-3.5" /><span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-8">
+            {activeTool === 'resistor' && (
+              <Widget title="4-Band Resistor Decoder" icon={Layers}>
+                 <div className="flex flex-col items-center py-4">
+                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-800 dark:text-white mb-8">{formatUnit(resValue, 'Ω')}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
+                    {[0, 1, 2].map(bIdx => (
+                      <select key={bIdx} className="w-full border-2 border-transparent rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
+                        value={bands[bIdx].name} style={{ backgroundColor: bands[bIdx].hex, color: bands[bIdx].text }}
+                        onChange={(e) => { const newBands = [...bands]; newBands[bIdx] = RESISTOR_COLORS.find(c => c.name === e.target.value); setBands(newBands); }}>
+                        {RESISTOR_COLORS.map(c => <option key={c.name} value={c.name} style={{ backgroundColor: c.hex, color: c.text }}>{c.name}</option>)}
+                      </select>
+                    ))}
+                  </div>
+                </div>
+              </Widget>
+            )}
+
+            {activeTool === 'inductor' && (
+              <Widget title="Inductor Color Decoder" icon={Layers}>
+                 <div className="flex flex-col items-center py-4">
+                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-800 dark:text-white mb-8">{formatUnit(indValue, 'µH')}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
+                    {[0, 1, 2].map(bIdx => (
+                      <select key={bIdx} className="w-full border-2 border-transparent rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
+                        value={indBands[bIdx].name} style={{ backgroundColor: indBands[bIdx].hex, color: indBands[bIdx].text }}
+                        onChange={(e) => { const newBands = [...indBands]; newBands[bIdx] = RESISTOR_COLORS.find(c => c.name === e.target.value); setIndBands(newBands); }}>
+                        {RESISTOR_COLORS.map(c => <option key={c.name} value={c.name} style={{ backgroundColor: c.hex, color: c.text }}>{c.name}</option>)}
+                      </select>
+                    ))}
+                  </div>
+                </div>
+              </Widget>
+            )}
+
+            {activeTool === 'base' && (
+              <Widget title="Number System Converter" icon={Hash}>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80">
+                      <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 block">Decimal (Base 10)</label>
+                      <input type="text" value={bases.dec} onChange={e => updateBases(e.target.value, 10)} className="w-full bg-transparent border-b-2 border-slate-200 dark:border-slate-700 py-2 text-2xl font-mono outline-none focus:border-violet-400" />
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80">
+                      <label className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-4 block">Binary (Base 2)</label>
+                      <input type="text" value={bases.bin} onChange={e => updateBases(e.target.value, 2)} className="w-full bg-transparent border-b-2 border-sky-200 dark:border-sky-800 py-2 text-2xl font-mono outline-none focus:border-sky-400 text-sky-500" />
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800/80">
+                      <label className="text-xs font-bold text-pink-400 uppercase tracking-wider mb-4 block">Hexadecimal (Base 16)</label>
+                      <input type="text" value={bases.hex} onChange={e => updateBases(e.target.value, 16)} className="w-full bg-transparent border-b-2 border-pink-200 dark:border-pink-800 py-2 text-2xl font-mono outline-none focus:border-pink-400 text-pink-500 uppercase" />
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'reactance' && (
+              <Widget title="Reactance Calculator" icon={Zap}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Frequency (Hz)</label><input type="number" value={rFreq} onChange={e=>setRFreq(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Inductance (mH)</label><input type="number" value={rL} onChange={e=>setRL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Capacitance (µF)</label><input type="number" value={rC} onChange={e=>setRC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                    </div>
+                    <div className="bg-violet-50 dark:bg-violet-500/10 p-8 rounded-3xl flex flex-col justify-center border border-violet-100 dark:border-violet-500/20">
+                      <div className="mb-6"><div className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-1">Inductive Reactance (XL)</div><div className="text-4xl font-mono font-bold text-violet-700 dark:text-violet-300">{(2 * Math.PI * rFreq * (rL/1000)).toFixed(2)} Ω</div></div>
+                      <div><div className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-1">Capacitive Reactance (XC)</div><div className="text-4xl font-mono font-bold text-violet-700 dark:text-violet-300">{(rFreq && rC ? (1 / (2 * Math.PI * rFreq * (rC/1e6))) : 0).toFixed(2)} Ω</div></div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'opamp' && (
+              <Widget title="Operational Amplifier" icon={Activity}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Feedback Resistor (Rf) kΩ</label><input type="number" value={opRf} onChange={e=>setOpRf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Input Resistor (Rin) kΩ</label><input type="number" value={opRin} onChange={e=>setOpRin(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                    </div>
+                    <div className="bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Inverting Gain</div><div className="text-4xl font-mono font-bold">-{opRin ? (opRf / opRin).toFixed(2) : 0}</div></div>
+                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Non-Inverting Gain</div><div className="text-4xl font-mono font-bold">+{opRin ? (1 + (opRf / opRin)).toFixed(2) : 0}</div></div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'led' && (
+              <Widget title="LED Resistor" icon={Sun}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Source Voltage (Vs) V</label><input type="number" value={ledVs} onChange={e=>setLedVs(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">LED Forward Voltage (Vf) V</label><input type="number" value={ledVf} onChange={e=>setLedVf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">LED Forward Current (If) mA</label><input type="number" value={ledIf} onChange={e=>setLedIf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-400" /></div>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-500/10 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-100 dark:border-amber-500/20">
+                      <div className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">Required Resistor</div>
+                      <div className="text-6xl font-mono font-bold text-amber-600 dark:text-amber-400">{ledIf ? ((ledVs - ledVf) / (ledIf / 1000)).toFixed(0) : 0} Ω</div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'power' && (
+              <Widget title="Power Calculator" icon={Zap}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Voltage (V)</label><input type="number" value={pwrV} onChange={e=>setPwrV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Current (I)</label><input type="number" value={pwrI} onChange={e=>setPwrI(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                    </div>
+                    <div className="bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Power (P = V×I)</div><div className="text-5xl font-mono font-bold">{(pwrV * pwrI).toFixed(2)} W</div></div>
+                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Resistance (R = V/I)</div><div className="text-3xl font-mono font-bold">{pwrI ? (pwrV / pwrI).toFixed(2) : 0} Ω</div></div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'db' && (
+              <Widget title="Decibel Converter" icon={Sliders}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Input Value</label><input type="number" value={dbV1} onChange={e=>setDbV1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Output Value</label><input type="number" value={dbV2} onChange={e=>setDbV2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-100 dark:border-slate-700/50">
+                      <div className="mb-6"><div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-200">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
+                      <div><div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-slate-200">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'wavelength' && (
+              <Widget title="Wavelength" icon={Radio}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Frequency (MHz)</label><input type="number" value={waveF} onChange={e=>setWaveF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                    </div>
+                    <div className="bg-violet-50 dark:bg-violet-500/10 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-100 dark:border-violet-500/20">
+                      <div className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Wavelength (c/f)</div>
+                      <div className="text-6xl font-mono font-bold text-violet-700 dark:text-violet-300">{waveF ? (299.792 / waveF).toFixed(4) : 0} m</div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'awg' && (
+              <Widget title="AWG Reference" icon={Hash}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Select AWG Size</label>
+                        <select value={awgSel} onChange={e=>setAwgSel(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400 appearance-none">
+                          {AWG_DATA.map(a => <option key={a.awg} value={a.awg}>AWG {a.awg}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Diameter</div><div className="text-4xl font-mono font-bold">{awgData.dia} mm</div></div>
+                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Resistance</div><div className="text-4xl font-mono font-bold">{awgData.res} Ω/km</div></div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'trace' && (
+              <Widget title="PCB Trace Width" icon={Terminal}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Current (Amps)</label><input type="number" value={tCurr} onChange={e=>setTCurr(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" /></div>
+                      <div><label className="text-xs font-bold text-slate-500 uppercase">Temp Rise (°C)</label><input type="number" value={tThick} onChange={e=>setTThick(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-400" placeholder="e.g. 10" /></div>
+                    </div>
+                    <div className="bg-violet-50 dark:bg-violet-500/10 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-100 dark:border-violet-500/20">
+                      <div className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Estimated Trace Width</div>
+                      <div className="text-6xl font-mono font-bold text-violet-700 dark:text-violet-300">{tCurr && tThick ? ((tCurr / (0.048 * Math.pow(tThick, 0.44))) ** (1/0.725) / 1.378).toFixed(2) : 0} mm</div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+          </div>
+        </div>
+      );
+    };
+
+    // --- VIRTUAL LABS ---
+    const VirtualLabManager = ({ animations }) => {
+      const [activeLab, setActiveLab] = useState('cro'); 
+      const LAB_TABS = [
+        { id: 'cro', label: 'Oscilloscope', icon: Monitor },
+        { id: 'rect', label: 'Half-Wave Rectifier', icon: Activity },
+        { id: 'zener', label: 'Zener Diode', icon: Activity },
+        { id: 'ohms', label: "Ohm's Law", icon: Zap },
+        { id: 'filter', label: 'Low Pass Filter', icon: Radio },
+        { id: 'reson', label: 'Series Resonance', icon: Globe },
+        { id: 'diode', label: 'Diode V-I', icon: Activity },
+        { id: 'gates', label: 'Boolean Logic', icon: GitBranch }
+      ];
+
+      return (
+        <div className="space-y-6 animate-in fade-in duration-700">
+          <div className="bg-white/80 dark:bg-slate-900/60 p-2 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
+            {LAB_TABS.map(tab => (
+              <button key={tab.id} onClick={() => setActiveLab(tab.id)} className={`flex items-center space-x-2 text-xs font-semibold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${ activeLab === tab.id ? 'bg-violet-500 text-white shadow-md scale-105' : 'text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400' }`}>
+                <tab.icon className="w-3.5 h-3.5" /><span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-8">
+            {activeLab === 'cro' && <CROVisualizer animations={animations} />}
+            {activeLab === 'rect' && <RectifierVisualizer animations={animations} />}
+            {activeLab === 'zener' && <ZenerVisualizer />}
+            {activeLab === 'ohms' && <OhmsLawVisualizer />}
+            {activeLab === 'filter' && <BodePlotVisualizer />}
+            {activeLab === 'reson' && <ResonanceVisualizer />}
+            {activeLab === 'diode' && <DiodeVisualizer />}
+            {activeLab === 'gates' && <LogicGatesVisualizer />}
+          </div>
+        </div>
+      );
+    };
+
+    const CROVisualizer = ({ animations }) => {
+      const [isPlaying, setIsPlaying] = useState(true);
+      const [chA, setChA] = useState({ amp: 2.5, freq: 40 });
+      const canvasRef = useRef(null); const animRef = useRef(null); const timeRef = useRef(0);
+
+      useEffect(() => {
+        const canvas = canvasRef.current; if (!canvas) return;
+        const ctx = canvas.getContext('2d'); if (!ctx) return;
+        const draw = () => {
+          const { width, height } = canvas; ctx.clearRect(0, 0, width, height);
+          if (isPlaying && animations) timeRef.current += 0.005;
+          ctx.beginPath(); ctx.strokeStyle = '#10B981'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          for (let x = 0; x < width; x++) {
+            const t = (x / width) * 0.1 + timeRef.current; 
+            const y = (height / 2) - (chA.amp * 20 * Math.sin(2 * Math.PI * chA.freq * t));
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke(); animRef.current = requestAnimationFrame(draw);
+        };
+        animRef.current = requestAnimationFrame(draw);
+        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+      }, [isPlaying, chA, animations]);
+
+      return (
+        <Widget title="Alternating Current Waves" icon={Monitor}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-950 border-4 border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
+              <div className="absolute inset-0 cro-grid opacity-60"></div>
+              <div className="absolute top-1/2 left-0 w-full h-px bg-sky-500/50"></div>
+              <div className="absolute top-0 left-1/2 w-px h-full bg-sky-500/50"></div>
+              <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10 drop-shadow-[0_0_4px_rgba(16,185,129,0.8)]" />
+              <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-emerald-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
+                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+              </button>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-100 dark:border-slate-800">
+              <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-10 flex items-center tracking-wide"><Zap className="w-5 h-5 mr-3 text-violet-500" /> Signal Control</h4>
+              <div className="space-y-10">
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600">{chA.amp}V</span></div>
+                  <input type="range" min="0" max="5" step="0.5" value={chA.amp} onChange={e => setChA({...chA, amp: Number(e.target.value)||0})} className="text-violet-500" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-violet-600">{chA.freq}Hz</span></div>
+                  <input type="range" min="10" max="100" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||0})} className="text-violet-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const RectifierVisualizer = ({ animations }) => {
+      const [isPlaying, setIsPlaying] = useState(true);
+      const [chA, setChA] = useState({ amp: 4, freq: 20 });
+      const canvasRef = useRef(null); const animRef = useRef(null); const timeRef = useRef(0);
+
+      useEffect(() => {
+        const canvas = canvasRef.current; if (!canvas) return;
+        const ctx = canvas.getContext('2d'); if (!ctx) return;
+        const draw = () => {
+          const { width, height } = canvas; ctx.clearRect(0, 0, width, height);
+          if (isPlaying && animations) timeRef.current += 0.005;
+
+          ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; ctx.lineWidth = 2;
+          for (let x = 0; x < width; x++) {
+            const t = (x / width) * 0.1 + timeRef.current; 
+            const y = (height / 2) - (chA.amp * 20 * Math.sin(2 * Math.PI * chA.freq * t));
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          ctx.beginPath(); ctx.strokeStyle = '#8B5CF6'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+          for (let x = 0; x < width; x++) {
+            const t = (x / width) * 0.1 + timeRef.current; 
+            let val = Math.sin(2 * Math.PI * chA.freq * t);
+            if (val < 0) val = 0;
+            const y = (height / 2) - (chA.amp * 20 * val);
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          animRef.current = requestAnimationFrame(draw);
+        };
+        animRef.current = requestAnimationFrame(draw);
+        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+      }, [isPlaying, chA, animations]);
+
+      return (
+        <Widget title="Half-Wave Rectifier Waveforms" icon={Activity}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-950 border-4 border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
+              <div className="absolute top-1/2 left-0 w-full h-px bg-violet-500/50"></div>
+              <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10" />
+              <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-violet-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
+                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+              </button>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-100 dark:border-slate-800">
+              <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-violet-500" /> AC Input Source</h4>
+              <div className="space-y-10">
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600">{chA.amp}V</span></div>
+                  <input type="range" min="1" max="6" step="0.5" value={chA.amp} onChange={e => setChA({...chA, amp: Number(e.target.value)||1})} className="text-violet-500" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-violet-600">{chA.freq}Hz</span></div>
+                  <input type="range" min="10" max="60" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||10})} className="text-violet-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const ZenerVisualizer = () => {
+      const [vz, setVz] = useState(5); 
+      const [vin, setVin] = useState(-8); 
+      
+      const buildPath = () => {
+        const pts = [];
+        for(let v=-10; v<=0; v+=0.1) {
+          let i = v < -vz ? -Math.pow((-v - vz)*2, 2) * 5 : 0; 
+          pts.push(`${(v+10) * 10},${100 - (i / -50) * 100}`);
+        }
+        return `M ${pts.join(' L ')}`;
+      };
+      const currentI = vin < -vz ? -Math.pow((-vin - vz)*2, 2) * 5 : 0;
+
+      return (
+        <Widget title="Zener Diode Breakdown" icon={Activity}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Breakdown Voltage (Vz)</span> <span className="text-violet-600">{vz.toFixed(1)} V</span></div>
+                    <input type="range" min="2" max="9" step="0.5" value={vz} onChange={e => setVz(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Input Voltage (Vin)</span> <span className="text-violet-600">{vin.toFixed(1)} V</span></div>
+                    <input type="range" min="-10" max="0" step="0.1" value={vin} onChange={e => setVin(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Reverse Current (Iz)</span>
+                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
+                  </div>
+              </div>
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
+                  <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <line x1="100" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <text x="100" y="-3" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">V (-10 to 0)</text>
+                  <text x="106" y="100" fill="currentColor" fontSize="4" textAnchor="start" className="font-mono text-slate-400 font-bold">Iz (-mA)</text>
+                  <path d={buildPath()} fill="none" stroke="#8B5CF6" strokeWidth="2.5" />
+                  <circle cx={(vin+10)*10} cy={100 - (currentI/-50)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
+                </svg>
+              </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const OhmsLawVisualizer = () => {
+      const [v, setV] = useState(10); 
+      const [r, setR] = useState(2); 
+      const i = v / r;
+
+      return (
+        <Widget title="Ohm's Law Verification" icon={Zap}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Voltage (V)</span> <span className="text-violet-600">{v.toFixed(1)} V</span></div>
+                    <input type="range" min="0" max="20" step="1" value={v} onChange={e => setV(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Resistance (R)</span> <span className="text-violet-600">{r.toFixed(1)} kΩ</span></div>
+                    <input type="range" min="1" max="10" step="0.5" value={r} onChange={e => setR(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Current (I)</span>
+                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{i.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
+                  </div>
+              </div>
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">V (Volts)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">I (mA)</text>
+                  <path d={`M 0,100 L 100,${100 - (20/r)*5}`} fill="none" stroke="#10B981" strokeWidth="2.5" />
+                  <circle cx={(v/20)*100} cy={100 - (i/20)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
+                  <line x1={(v/20)*100} y1="100" x2={(v/20)*100} y2={100 - (i/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
+                  <line x1="0" y1={100 - (i/20)*100} x2={(v/20)*100} y2={100 - (i/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
+                </svg>
+              </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const BodePlotVisualizer = () => {
+      const [r, setR] = useState(1); 
+      const [c, setC] = useState(1); 
+      const fc = 1 / (2 * Math.PI * (r*1000) * (c/1000000));
+      
+      const buildPath = () => {
+        const pts = [];
+        for(let i=0; i<=100; i++) {
+          let f = Math.pow(10, (i/100)*4); 
+          let gain = 20 * Math.log10(1 / Math.sqrt(1 + Math.pow(f/fc, 2)));
+          pts.push(`${i},${Math.max(0, 100 + gain*2.5)}`); 
+        }
+        return `M ${pts.join(' L ')}`;
+      };
+
+      return (
+        <Widget title="RC Low Pass Filter Bode Plot" icon={Radio}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Resistance (R)</span> <span className="text-violet-600">{r.toFixed(1)} kΩ</span></div>
+                    <input type="range" min="0.1" max="10" step="0.1" value={r} onChange={e => setR(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Capacitance (C)</span> <span className="text-violet-600">{c.toFixed(1)} µF</span></div>
+                    <input type="range" min="0.1" max="10" step="0.1" value={c} onChange={e => setC(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Cutoff Freq (fc)</span>
+                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{fc.toFixed(1)} <span className="text-lg opacity-50">Hz</span></span>
+                  </div>
+              </div>
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Log(Freq)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Gain (dB)</text>
+                  <path d={buildPath()} fill="none" stroke="#F97316" strokeWidth="2.5" />
+                </svg>
+              </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const ResonanceVisualizer = () => {
+      const [l, setL] = useState(10); 
+      const [c, setC] = useState(10); 
+      const fr = 1 / (2 * Math.PI * Math.sqrt((l/1000) * (c/1000000)));
+      
+      const buildPath = () => {
+        const pts = [];
+        for(let i=0; i<=100; i++) {
+          let f = i * 20; 
+          if(f===0) f=0.1;
+          let xl = 2 * Math.PI * f * (l/1000);
+          let xc = 1 / (2 * Math.PI * f * (c/1000000));
+          let current = 10 / Math.sqrt(100 + Math.pow(xl - xc, 2)); 
+          pts.push(`${i},${100 - current*80}`); 
+        }
+        return `M ${pts.join(' L ')}`;
+      };
+
+      return (
+        <Widget title="Series RLC Resonance Curve" icon={Globe}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Inductance (L)</span> <span className="text-violet-600">{l.toFixed(1)} mH</span></div>
+                    <input type="range" min="1" max="50" step="1" value={l} onChange={e => setL(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Capacitance (C)</span> <span className="text-violet-600">{c.toFixed(1)} µF</span></div>
+                    <input type="range" min="1" max="50" step="1" value={c} onChange={e => setC(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Resonant Freq (fr)</span>
+                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{fr.toFixed(0)} <span className="text-lg opacity-50">Hz</span></span>
+                  </div>
+              </div>
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Freq (Hz)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Current (I)</text>
+                  <path d={buildPath()} fill="none" stroke="#EAB308" strokeWidth="2.5" />
+                  <line x1={(fr/2000)*100} y1="100" x2={(fr/2000)*100} y2="0" stroke="#ef4444" strokeWidth="0.5" strokeDasharray="2 2" />
+                </svg>
+              </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const DiodeVisualizer = () => {
+      const [vd, setVd] = useState(0); 
+      const buildPath = () => {
+        const pts = [];
+        for(let v=0; v<=1; v+=0.02) {
+          let i = v > 0.5 ? Math.pow((v - 0.5) * 2, 3) * 20 : 0; 
+          pts.push(`${v * 100},${100 - (i / 20) * 100}`);
+        }
+        return `M 0,100 L ${pts.join(' L ')}`;
+      };
+      const currentI = vd > 0.5 ? Math.pow((vd - 0.5) * 2, 3) * 20 : 0;
+
+      return (
+        <Widget title="Diode Forward Bias" icon={Activity}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-widest mb-4"><span>Forward Voltage (Vd)</span> <span className="text-violet-600">{vd.toFixed(2)} V</span></div>
+                    <input type="range" min="0" max="1" step="0.05" value={vd} onChange={e => setVd(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-500 uppercase tracking-widest">Forward Current (Id)</span>
+                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
+                  </div>
+              </div>
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
+                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-300 dark:text-slate-700" />
+                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Vd (V)</text>
+                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-400 font-bold">Id (mA)</text>
+                  <path d={buildPath()} fill="none" stroke="#3b82f6" strokeWidth="2.5" />
+                  <circle cx={vd*100} cy={100 - (currentI/20)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
+                  <line x1={vd*100} y1="100" x2={vd*100} y2={100 - (currentI/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
+                </svg>
+              </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const LogicGatesVisualizer = () => {
+      const [inputs, setInputs] = useState([0, 0]);
+      const addInput = () => { if (inputs.length < 5) setInputs([...inputs, 0]); };
+      const removeInput = () => { if (inputs.length > 2) setInputs(inputs.slice(0, -1)); };
+      const toggleInput = (index) => { const newInputs = [...inputs]; newInputs[index] = newInputs[index] === 0 ? 1 : 0; setInputs(newInputs); };
+
+      const calcAND = inputs.every(v => v === 1) ? 1 : 0;
+      const calcOR = inputs.some(v => v === 1) ? 1 : 0;
+      const calcNAND = calcAND === 1 ? 0 : 1;
+      const calcNOR = calcOR === 1 ? 0 : 1;
+      const calcXOR = inputs.reduce((acc, val) => acc ^ val, 0);
+      const calcXNOR = calcXOR === 1 ? 0 : 1;
+
+      const inputLabels = ['A', 'B', 'C', 'D', 'E'];
+
+      return (
+        <Widget title="Digital Boolean Logic" icon={GitBranch}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="flex flex-col justify-center items-center py-12 px-6 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl relative overflow-hidden">
+              <div className="absolute top-6 right-6 flex space-x-3 z-20">
+                <button onClick={removeInput} disabled={inputs.length <= 2} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-600 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">-</span></button>
+                <button onClick={addInput} disabled={inputs.length >= 5} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-600 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">+</span></button>
+              </div>
+              <div className="flex flex-wrap justify-center gap-6 mb-8 mt-10 z-10">
+                {inputs.map((val, idx) => (
+                  <div key={idx} className="flex flex-col items-center space-y-4">
+                    <button onClick={() => toggleInput(idx)} className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] flex items-center justify-center text-4xl sm:text-5xl font-mono font-bold transition-all duration-300 shadow-xl ${val === 1 ? 'border-violet-500 bg-violet-500 text-white shadow-violet-500/40 scale-110' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-400 hover:border-violet-300 dark:hover:border-violet-600'}`}>{val}</button>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest bg-white/80 dark:bg-slate-800/80 px-3 py-1 rounded-full backdrop-blur-md">In {inputLabels[idx]}</span>
+                  </div>
+                ))}
+              </div>
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse border px-4 py-1.5 border-slate-200 dark:border-slate-700 rounded-full bg-white dark:bg-slate-800 z-10">Click Nodes To Toggle</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { name: 'AND', val: calcAND, color: 'text-blue-500', bg: 'bg-blue-500' }, { name: 'OR', val: calcOR, color: 'text-emerald-500', bg: 'bg-emerald-500' },
+                { name: 'NAND', val: calcNAND, color: 'text-rose-500', bg: 'bg-rose-500' }, { name: 'NOR', val: calcNOR, color: 'text-amber-500', bg: 'bg-amber-500' },
+                { name: 'XOR', val: calcXOR, color: 'text-purple-500', bg: 'bg-purple-500' }, { name: 'XNOR', val: calcXNOR, color: 'text-cyan-500', bg: 'bg-cyan-500' }
+              ].map(gate => (
+                <div key={gate.name} className="flex flex-col items-center justify-center p-6 border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-3xl group hover:border-violet-400 dark:hover:border-violet-600 transition-colors duration-300">
+                  <span className={`font-bold tracking-widest uppercase mb-4 ${gate.color}`}>{gate.name}</span>
+                  <span className={`w-14 h-14 flex items-center justify-center rounded-2xl text-2xl font-mono transition-all duration-300 shadow-lg ${gate.val === 1 ? `${gate.bg} text-white scale-110` : 'bg-white dark:bg-slate-800 text-slate-300 dark:text-slate-600'}`}>{gate.val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    // --- SGPA CALCULATOR ---
+    const SGPAView = () => {
+      const [grades, setGrades] = useState(KTU_SUBJECTS.reduce((a, s) => ({ ...a, [s.code]: 'A' }), {}));
+      const sgpa = useMemo(() => {
+        let pts = 0, crd = 0;
+        KTU_SUBJECTS.forEach(s => { pts += GRADES[grades[s.code]] * s.credits; crd += s.credits; });
+        return (pts / crd).toFixed(2);
+      }, [grades]);
+
+      return (
+        <div className="animate-in fade-in duration-700">
+          <Widget title="Academic Grade Engine" icon={Calculator}>
+             <div className="flex flex-col lg:flex-row gap-10">
+                <div className="flex-1 space-y-3">
+                  {KTU_SUBJECTS.map((subj) => (
+                    <div key={subj.code} className="flex justify-between items-center py-3 px-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-colors">
+                      <div className="text-sm flex flex-col sm:flex-row sm:items-center">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 sm:mr-4">{subj.code}</span> 
+                        <span className="text-slate-500 text-xs font-medium">{subj.name}</span>
+                      </div>
+                      <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-5 text-base font-bold outline-none cursor-pointer focus:border-violet-500 transition-colors shadow-sm text-slate-800 dark:text-slate-200" value={grades[subj.code]} onChange={(e) => setGrades({...grades, [subj.code]: e.target.value})}>
+                        {Object.keys(GRADES).map(g => <option key={g} value={g}>{g}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-full lg:w-96 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-3xl flex flex-col items-center justify-center p-10 shadow-xl shadow-violet-500/20 text-white">
+                  <div className="text-sm font-bold uppercase tracking-widest mb-6 text-violet-100">Calculated SGPA</div>
+                  <div className="text-8xl font-bold tracking-tighter mb-4 drop-shadow-lg">{sgpa}</div>
+                </div>
+             </div>
+          </Widget>
+        </div>
+      );
+    };
+
+    // --- ABOUT ---
+    const AboutView = ({ state, dispatch }) => {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in zoom-in-95 duration-500">
+          <div className="relative bg-white dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-10 flex flex-col h-full shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-all duration-700"></div>
+            <div className="relative z-10 flex-grow">
+              <div className="inline-flex items-center space-x-2 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
+                <User className="w-3.5 h-3.5" /><span>Created By</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-800 dark:text-white">{APP_CONFIG.creator}</h2>
+              <p className="text-lg font-medium text-slate-500 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-400" /> {APP_CONFIG.course}</p>
+              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 mb-8">
+                <p className="text-base leading-relaxed text-slate-600 dark:text-slate-300 font-medium">
+                  This project was prepared as part of the mini-project for our first-year <strong>EE & IPR</strong> subject. Designed explicitly for the {APP_CONFIG.university} syllabus, this acts as a comprehensive academic companion.
+                </p>
+              </div>
+            </div>
+            <div className="relative z-10 pt-8 border-t border-slate-100 dark:border-slate-800">
+              <a href={`mailto:${APP_CONFIG.email}`} className="inline-flex items-center space-x-3 text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-violet-600 transition-colors">
+                <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"><Mail className="w-4 h-4" /></div><span>{APP_CONFIG.email}</span>
+              </a>
+            </div>
+          </div>
+
+          <Widget title="System Settings" icon={Settings}>
+            <div className="space-y-10 flex flex-col h-full">
+              <div className="flex-grow">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">UI Theme Option</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  {[
+                    { id: 'dark', label: 'Deep Slate', icon: Moon },
+                    { id: 'light', label: 'Soft Ivory', icon: Sun },
+                    { id: 'nothing', label: 'Matrix Grid', icon: Layers }
+                  ].map(t => (
+                    <button key={t.id} onClick={() => dispatch({ type: 'SET_THEME', payload: t.id })} className={`flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all duration-300 ${state.theme === t.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold shadow-sm' : 'border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-violet-300 dark:hover:bg-slate-900'}`}>
+                      <t.icon className="w-5 h-5" /><span className="text-sm uppercase tracking-wider">{t.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
+                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Performance</h4>
+                 <label className="flex items-center justify-between p-5 border-2 border-slate-100 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group">
+                  <div className="flex items-center space-x-4">
+                    <Activity className="w-5 h-5 text-slate-500 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
+                    <div className="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Animations Enabled</div>
+                  </div>
+                  <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${state.animations ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                       onClick={() => dispatch({ type: 'TOGGLE_ANIMATIONS' })}>
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${state.animations ? 'left-7' : 'left-1'}`}></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </Widget>
+        </div>
+      );
+    };
+
+    // ==========================================
+    // 6. APP LOGIC & ROUTING
+    // ==========================================
+    const initialState = { theme: 'light', activeTab: 'news', animations: true, isSidebarOpen: false };
+    function reducer(state, action) {
+      switch (action.type) {
+        case 'SET_THEME': return { ...state, theme: action.payload };
+        case 'SET_TAB': return { ...state, activeTab: action.payload, isSidebarOpen: false }; 
+        case 'TOGGLE_ANIMATIONS': return { ...state, animations: !state.animations };
+        case 'TOGGLE_SIDEBAR': return { ...state, isSidebarOpen: !state.isSidebarOpen };
+        default: return state;
+      }
+    }
+
+    const Toast = ({ message, onClose }) => (
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-4 rounded-full font-bold text-xs uppercase tracking-widest z-50 flex items-center shadow-2xl animate-in slide-in-from-bottom-10 fade-in">
+        <span>{message}</span><button onClick={onClose} className="ml-4 opacity-50 hover:opacity-100"><X className="w-4 h-4" /></button>
+      </div>
+    );
+
+    function NexusApp() {
+      const [state, dispatch] = useReducer(reducer, initialState);
+      const [toast, setToast] = useState(null);
+
+      const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 4000); };
+
+      useEffect(() => {
+        const root = document.documentElement;
+        root.classList.remove('light', 'dark', 'theme-nothing');
+        if (state.theme === 'dark') root.classList.add('dark');
+        else if (state.theme === 'light') root.classList.add('light');
+        else root.classList.add('dark', 'theme-nothing');
+      }, [state.theme]);
+
+      const getBackgroundClass = () => {
+        if (state.theme === 'nothing') return 'bg-matrix-dark';
+        if (state.theme === 'dark') return 'bg-ambient-dark text-white'; 
+        return 'bg-ambient-light text-slate-800';
+      };
+
+      const TABS = [
+        { id: 'news', label: 'Tech News Feed', icon: Globe },
+        { id: 'dashboard', label: 'Command Center', icon: Activity },
+        { id: 'timetable', label: 'Academic Schedule', icon: Calendar },
+        { id: 'tools', label: 'Engineering Tools', icon: Terminal },
+        { id: 'lab', label: 'Virtual Laboratories', icon: Cpu },
+        { id: 'calc', label: 'Academic Grades', icon: Calculator },
+        { id: 'about', label: 'System Info & Settings', icon: Sliders }
+      ];
+
+      return (
+        <div className={`min-h-screen flex flex-col ${getBackgroundClass()} selection:bg-violet-500 selection:text-white relative overflow-hidden`}>
+          {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+          <div className={`fixed inset-0 bg-slate-900/30 backdrop-blur-md z-40 transition-all duration-500 ${state.isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}></div>
+
+          <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border-r border-slate-200/50 dark:border-slate-800/50 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-2xl ${state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <div className="p-6 md:p-8 flex justify-between items-center border-b border-slate-100 dark:border-slate-800/50">
+               <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center font-bold font-sans text-xl shadow-lg shadow-violet-500/30">NX</div>
+                  <div className="flex flex-col">
+                    <span className="font-bold tracking-widest uppercase text-base text-slate-800 dark:text-white leading-none">ECE Hub</span>
+                  </div>
+               </div>
+               <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-2.5 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
+            </div>
+
+            <div className="flex-grow py-8 px-6 space-y-2 overflow-y-auto">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-6">Menu Options</div>
+              {TABS.map(tab => (
+                <button key={tab.id} onClick={() => dispatch({ type: 'SET_TAB', payload: tab.id })} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${state.activeTab === tab.id ? 'bg-violet-50 dark:bg-violet-500/10 border-violet-100 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 shadow-sm translate-x-2' : 'bg-transparent border-transparent text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-800 dark:hover:text-slate-200'}`}>
+                  <div className="flex items-center space-x-4"><tab.icon className="w-5 h-5" /><span>{tab.label}</span></div>
+                  {state.activeTab === tab.id && <ChevronRight className="w-4 h-4" />}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-8 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50">
+               <div className="flex flex-col">
+                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Created By</div>
+                 <div className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{APP_CONFIG.creator}</div>
+               </div>
+            </div>
+          </aside>
+
+          <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/60 dark:bg-slate-950/60 border-b border-slate-200/50 dark:border-slate-800/50 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-20 flex items-center justify-between">
+              <div className="flex items-center space-x-5">
+                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-3 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-xl hover:shadow-sm transition-all active:scale-95 text-slate-600 dark:text-slate-300"><Menu className="w-5 h-5" /></button>
+                <div className="hidden sm:flex flex-col border-l-2 border-slate-200 dark:border-slate-800 pl-5">
+                  <span className="font-bold tracking-[0.2em] uppercase text-base text-slate-800 dark:text-white leading-none">{APP_CONFIG.name}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase mt-2 leading-none tracking-widest">{APP_CONFIG.university}</span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-5">
+                <span className="hidden md:inline text-xs font-bold uppercase tracking-widest text-slate-500">{TABS.find(t => t.id === state.activeTab).label}</span>
+                <div className="flex items-center space-x-2 border border-emerald-200 dark:border-emerald-800/50 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-blink"></span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">System Online</span>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 py-10 relative z-10 transition-all duration-500 flex flex-col">
+             {state.activeTab === 'news' && <NewsHubView showToast={showToast} />}
+             {state.activeTab === 'dashboard' && <DashboardView />}
+             {state.activeTab === 'timetable' && <TimetableView showToast={showToast} />}
+             {state.activeTab === 'tools' && <ToolsView />}
+             {state.activeTab === 'lab' && <VirtualLabManager animations={state.animations} />}
+             {state.activeTab === 'calc' && <SGPAView />}
+             {state.activeTab === 'about' && <AboutView state={state} dispatch={dispatch} />}
+          </main>
+
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<NexusApp />);
+  </script>
+</body>
+</html>
