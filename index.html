@@ -68,31 +68,51 @@
     // 1. Safe extraction of React hooks
     const { useState, useEffect, useReducer, useRef, useMemo } = React;
     
-    // 2. Safe extraction of Icons with a Smart Proxy (Prevents Error 130)
+    // 2. Safe extraction of Icons (Prevents Error 130 caused by Proxies handling Symbols)
+    const lucide = window.lucideReact || window.LucideReact || {};
+    
     const FallbackIcon = (props) => (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
         <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
       </svg>
     );
 
-    const IconLibrary = new Proxy({}, {
-      get: (target, propName) => {
-        const lucide = window.lucideReact || window.LucideReact;
-        if (lucide && lucide[propName]) {
-          return lucide[propName];
-        }
-        return FallbackIcon;
-      }
-    });
+    const safeIcon = (name) => lucide[name] || FallbackIcon;
 
-    const { 
-      Activity, Calculator, Settings, Play, Pause, RotateCcw,
-      Zap, Cpu, Hash, Layers, Sun, Moon, Terminal,
-      GraduationCap, Clock, Monitor, User, Menu, X, CheckCircle, Circle, 
-      ListTodo, Code, ChevronRight, GitBranch, Radio, Globe, 
-      ArrowLeft, ExternalLink, Sliders, Database, RefreshCw, 
-      Mail, Calendar
-    } = IconLibrary;
+    const Activity = safeIcon('Activity');
+    const Calculator = safeIcon('Calculator');
+    const Settings = safeIcon('Settings');
+    const Play = safeIcon('Play');
+    const Pause = safeIcon('Pause');
+    const RotateCcw = safeIcon('RotateCcw');
+    const Zap = safeIcon('Zap');
+    const Cpu = safeIcon('Cpu');
+    const Hash = safeIcon('Hash');
+    const Layers = safeIcon('Layers');
+    const Sun = safeIcon('Sun');
+    const Moon = safeIcon('Moon');
+    const Terminal = safeIcon('Terminal');
+    const GraduationCap = safeIcon('GraduationCap');
+    const Clock = safeIcon('Clock');
+    const Monitor = safeIcon('Monitor');
+    const User = safeIcon('User');
+    const Menu = safeIcon('Menu');
+    const X = safeIcon('X');
+    const CheckCircle = safeIcon('CheckCircle');
+    const Circle = safeIcon('Circle');
+    const ListTodo = safeIcon('ListTodo');
+    const Code = safeIcon('Code');
+    const ChevronRight = safeIcon('ChevronRight');
+    const GitBranch = safeIcon('GitBranch');
+    const Radio = safeIcon('Radio');
+    const Globe = safeIcon('Globe');
+    const ArrowLeft = safeIcon('ArrowLeft');
+    const ExternalLink = safeIcon('ExternalLink');
+    const Sliders = safeIcon('Sliders');
+    const Database = safeIcon('Database');
+    const RefreshCw = safeIcon('RefreshCw');
+    const Mail = safeIcon('Mail');
+    const Calendar = safeIcon('Calendar');
 
     // ==========================================
     // CONFIGURATION
