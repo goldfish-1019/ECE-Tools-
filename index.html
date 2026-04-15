@@ -12,40 +12,85 @@
   <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@100;400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@100;400;700&display=swap');
 
     :root { --font-sans: 'Outfit', sans-serif; --font-mono: 'JetBrains Mono', monospace; }
-    body { font-family: var(--font-sans); overflow-x: hidden; background-color: #FAFAFA; color: #334155; transition: background-color 0.4s ease, color 0.4s ease; -webkit-font-smoothing: antialiased; }
-    body.dark { background-color: #0B0F19; color: #F8FAFC; }
+    
+    body { 
+      font-family: var(--font-sans); 
+      overflow-x: hidden; 
+      transition: background-color 0.5s ease, color 0.5s ease; 
+      -webkit-font-smoothing: antialiased; 
+      background-color: #FAFAFA;
+      color: #1E293B; /* High contrast text for light mode */
+    }
+
+    body.dark { 
+      background-color: #0B0F19; 
+      color: #F8FAFC; 
+    }
+    
     .font-mono { font-family: var(--font-mono) !important; }
 
-    .bg-ambient-light { background: radial-gradient(at 0% 0%, rgba(238, 242, 255, 1) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(255, 241, 242, 1) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(240, 253, 250, 1) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(250, 245, 255, 1) 0px, transparent 50%), #FFFFFF; }
-    .bg-ambient-dark { background: radial-gradient(at 0% 0%, rgba(30, 27, 75, 1) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(76, 29, 149, 0.3) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(15, 118, 110, 0.2) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(23, 37, 84, 0.5) 0px, transparent 50%), #020617; }
-    .cro-grid { background-image: linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px); background-size: 40px 40px; background-position: center center; }
+    /* Static Gradient Fallbacks behind the Canvas */
+    .bg-ambient-light { 
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(238, 242, 255, 1) 0%, transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(255, 241, 242, 1) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(240, 253, 250, 1) 0%, transparent 50%),
+        radial-gradient(circle at 0% 100%, rgba(250, 245, 255, 1) 0%, transparent 50%),
+        #FFFFFF;
+    }
+    
+    .bg-ambient-dark { 
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(30, 27, 75, 1) 0%, transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(76, 29, 149, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(15, 118, 110, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 0% 100%, rgba(23, 37, 84, 0.6) 0%, transparent 50%),
+        #020617;
+    }
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    /* True Matrix Hacker Theme Overrides */
+    body.matrix {
+      background-color: #050505 !important;
+      background-image: 
+        linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) !important;
+      background-size: 30px 30px !important;
+      color: #4ade80 !important;
+    }
+    body.matrix * { border-color: rgba(34, 197, 94, 0.4) !important; }
+    body.matrix .bg-white\/95, body.matrix .bg-white\/90, body.matrix .bg-white\/80, body.matrix .bg-slate-50, body.matrix .bg-slate-100 { 
+      background-color: rgba(5, 5, 5, 0.95) !important; color: #4ade80 !important; backdrop-filter: none !important; box-shadow: none !important;
+    }
+    body.matrix .text-slate-800, body.matrix .text-slate-900, body.matrix .text-slate-700, body.matrix .text-slate-600, body.matrix .text-slate-500, body.matrix .text-violet-600, body.matrix .text-violet-500 { color: #4ade80 !important; }
+    body.matrix .bg-violet-500, body.matrix .bg-violet-600 { background-color: #14532d !important; color: #4ade80 !important; }
+    body.matrix .bg-violet-50, body.matrix .bg-violet-100 { background-color: rgba(20, 83, 45, 0.3) !important; }
+    body.matrix input, body.matrix select { background-color: #000 !important; color: #4ade80 !important; }
+
+    /* Scrollbars & Controls */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
     
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
     input[type=range]:focus { outline: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border: 4px solid white; border-radius: 50%; background: currentColor; cursor: pointer; margin-top: -9px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .dark input[type=range]::-webkit-slider-thumb { border-color: #1E293B; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border: 4px solid white; border-radius: 50%; background: currentColor; cursor: pointer; margin-top: -9px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .dark input[type=range]::-webkit-slider-thumb, .matrix input[type=range]::-webkit-slider-thumb { border-color: #1E293B; }
     input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(148, 163, 184, 0.4); border-radius: 4px; }
 
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-    .animate-float { animation: float 5s ease-in-out infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     .animate-blink { animation: blink 2s ease-in-out infinite; }
 
     .news-content p { margin-bottom: 1.2rem; line-height: 1.8; color: inherit; }
     .news-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 1.5rem 0; max-height: 400px; object-fit: cover; }
-    .news-content a { text-decoration: none; color: #8B5CF6; font-weight: 500; transition: color 0.2s; }
+    .news-content a { text-decoration: none; color: #8B5CF6; font-weight: 600; transition: color 0.2s; }
   </style>
 </head>
-<body>
+<body class="bg-ambient-light">
   <div id="root"></div>
 
   <script type="text/babel" data-presets="react">
@@ -88,7 +133,10 @@
       Database: '<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>',
       RefreshCw: '<polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>',
       Mail: '<rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>',
-      Calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>'
+      Calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
+      TrendingUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline>',
+      BarChart: '<line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line>',
+      Wifi: '<path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line>'
     };
 
     const SvgIcon = ({ name, className = "", ...props }) => (
@@ -123,23 +171,160 @@
     const Radio = (p) => <SvgIcon name="Radio" {...p} />;
     const Globe = (p) => <SvgIcon name="Globe" {...p} />;
     const ArrowLeft = (p) => <SvgIcon name="ArrowLeft" {...p} />;
-    const ExternalLink = (p) => <SvgIcon name="ExternalLink" {...p} />;
     const Sliders = (p) => <SvgIcon name="Sliders" {...p} />;
     const Database = (p) => <SvgIcon name="Database" {...p} />;
     const RefreshCw = (p) => <SvgIcon name="RefreshCw" {...p} />;
     const Mail = (p) => <SvgIcon name="Mail" {...p} />;
     const Calendar = (p) => <SvgIcon name="Calendar" {...p} />;
+    const TrendingUp = (p) => <SvgIcon name="TrendingUp" {...p} />;
+    const BarChart = (p) => <SvgIcon name="BarChart" {...p} />;
+    const Wifi = (p) => <SvgIcon name="Wifi" {...p} />;
+
+    // ==========================================
+    // DYNAMIC CONTEXT-AWARE BACKGROUND ENGINE
+    // ==========================================
+    const ContextAmbientEngine = ({ theme, enabled, activeTab }) => {
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        if (!enabled) return;
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let elements = [];
+        let time = 0;
+        
+        const resize = () => {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          initElements();
+        };
+
+        const isDark = theme === 'dark' || theme === 'matrix';
+        const primaryColor = theme === 'matrix' ? 'rgba(74, 222, 128, ' : (isDark ? 'rgba(139, 92, 246, ' : 'rgba(99, 102, 241, ');
+
+        const initElements = () => {
+          elements = [];
+          if (activeTab === 'tools') {
+            const num = Math.floor((canvas.width * canvas.height) / 15000); 
+            for (let i = 0; i < num; i++) {
+              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, radius: Math.random() * 2 + 1 });
+            }
+          } else if (activeTab === 'news') {
+            const columns = Math.floor(canvas.width / 20);
+            for (let i = 0; i < columns; i++) {
+              elements.push({ x: i * 20, y: Math.random() * canvas.height, speed: Math.random() * 2 + 1, length: Math.random() * 20 + 10 });
+            }
+          } else if (activeTab === 'timetable') {
+            for (let i = 0; i < 15; i++) {
+              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, width: Math.random() * 100 + 50, speed: Math.random() * 0.5 + 0.2 });
+            }
+          } else if (activeTab === 'dashboard') {
+            elements.push({ angle: 0 }); // Radar angle
+          } else if (activeTab === 'calc') {
+            for (let i = 0; i < 30; i++) {
+              elements.push({ x: Math.random() * canvas.width, y: canvas.height + Math.random() * 500, speed: Math.random() * 1 + 0.5, radius: Math.random() * 20 + 5 });
+            }
+          }
+        };
+
+        const draw = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          time += 0.01;
+
+          if (activeTab === 'tools' || activeTab === 'about') {
+            // Particle Network
+            elements.forEach(p => {
+              p.x += p.vx; p.y += p.vy;
+              if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+              if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+              ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fillStyle = primaryColor + '0.4)'; ctx.fill();
+            });
+            for (let i = 0; i < elements.length; i++) {
+              for (let j = i + 1; j < elements.length; j++) {
+                const dist = Math.hypot(elements[i].x - elements[j].x, elements[i].y - elements[j].y);
+                if (dist < 150) {
+                  ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y);
+                  ctx.strokeStyle = primaryColor + (0.15 * (1 - dist / 150)) + ')'; ctx.lineWidth = 1; ctx.stroke();
+                }
+              }
+            }
+          } else if (activeTab === 'news') {
+            // Data Rain
+            ctx.fillStyle = primaryColor + '0.5)';
+            ctx.font = '14px monospace';
+            elements.forEach(drop => {
+              for(let k=0; k<drop.length; k++) {
+                const alpha = 1 - (k/drop.length);
+                ctx.fillStyle = primaryColor + alpha * 0.4 + ')';
+                ctx.fillText(Math.random() > 0.5 ? '1' : '0', drop.x, drop.y - (k*20));
+              }
+              drop.y += drop.speed;
+              if (drop.y - (drop.length*20) > canvas.height) { drop.y = 0; drop.speed = Math.random() * 2 + 1; }
+            });
+          } else if (activeTab === 'lab') {
+            // Multi Sine Waves
+            for (let i = 0; i < 3; i++) {
+              ctx.beginPath();
+              for (let x = 0; x < canvas.width; x += 10) {
+                const y = canvas.height/2 + Math.sin(x * 0.005 + time + i) * 100 * (i+1)/3;
+                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+              }
+              ctx.strokeStyle = primaryColor + (0.1 + i*0.05) + ')';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            }
+          } else if (activeTab === 'dashboard') {
+            // Radar Scanner
+            const cx = canvas.width / 2; const cy = canvas.height / 2; const r = Math.min(cx, cy) - 50;
+            elements[0].angle += 0.02;
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.strokeStyle = primaryColor + '0.1)'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, r*0.66, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, r*0.33, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(elements[0].angle)*r, cy + Math.sin(elements[0].angle)*r);
+            ctx.strokeStyle = primaryColor + '0.4)'; ctx.lineWidth = 2; ctx.stroke();
+          } else if (activeTab === 'timetable') {
+            // Horizontal sliding blocks
+            elements.forEach(b => {
+              b.x += b.speed;
+              if (b.x > canvas.width) { b.x = -b.width; b.y = Math.random() * canvas.height; }
+              ctx.fillStyle = primaryColor + '0.05)';
+              ctx.fillRect(b.x, b.y, b.width, 20);
+            });
+          } else if (activeTab === 'calc') {
+            // Ascending Bubbles
+            elements.forEach(b => {
+              b.y -= b.speed;
+              if (b.y < -50) { b.y = canvas.height + 50; b.x = Math.random() * canvas.width; }
+              ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+              ctx.strokeStyle = primaryColor + '0.2)'; ctx.stroke();
+            });
+          }
+
+          animationFrameId = requestAnimationFrame(draw);
+        };
+
+        window.addEventListener('resize', resize);
+        resize();
+        draw();
+
+        return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animationFrameId); };
+      }, [theme, enabled, activeTab]);
+
+      if (!enabled) return null;
+      return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-100 transition-opacity duration-1000" />;
+    };
 
     // ==========================================
     // CONFIGURATION
     // ==========================================
     const APP_CONFIG = {
       name: "ECE Tools Hub",
-      version: "v4.0",
+      version: "v7.0 Ultimate",
       creator: "Jiyon Sebastian",
       course: "First Year B.Tech ECE",
       university: "Kerala Technological University (KTU)",
-      project: "EE & IPR Mini-Project",
       email: "jiyonjewel1019@gmail.com"
     };
 
@@ -180,25 +365,22 @@
 
     const FALLBACK_NEWS = [
       {
-        title: "TSMC Begins 2nm Silicon Production Trials",
+        title: "Advances in 2nm Silicon Production",
         categories: ["VLSI"], pubDate: new Date().toISOString(),
-        description: "Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node...",
-        content: "<p>Taiwan Semiconductor Manufacturing Co. has officially initiated early trial production of its 2-nanometer node. This represents a monumental leap in VLSI design.</p>",
-        link: "https://www.eetimes.com/"
+        description: "Semiconductor foundries have officially initiated early trial production of the 2-nanometer node...",
+        content: "<p>Semiconductor foundries have officially initiated early trial production of the 2-nanometer node. This represents a leap in VLSI design, pushing the boundaries of integration further than previously thought possible.</p><p>Implementing Gate-All-Around (GAA) FETs instead of traditional FinFETs promises to drastically reduce power consumption while increasing computational density.</p>",
       },
       {
-        title: "New 6G Spectrum Guidelines Focusing on THz Bands",
+        title: "6G Spectrum Guidelines Focusing on THz Bands",
         categories: ["TELECOM"], pubDate: new Date(Date.now() - 3600000).toISOString(), 
-        description: "The IEEE standard body has released its preliminary guidelines for 6G telecommunications, heavily exploring the Terahertz spectrum...",
-        content: "<p>The IEEE standard body has released its preliminary guidelines for 6G telecommunications. Moving beyond the millimeter-wave frequencies used in 5G, the new standards heavily explore the Terahertz (THz) spectrum.</p>",
-        link: "https://www.eetimes.com/"
+        description: "Standard bodies have released preliminary guidelines for 6G telecommunications, heavily exploring the Terahertz spectrum...",
+        content: "<p>Standard bodies have released preliminary guidelines for 6G telecommunications. Moving beyond the millimeter-wave frequencies used in 5G, the new standards heavily explore the Terahertz (THz) spectrum, operating between 100 GHz and 10 THz.</p><p>This ultra-high frequency band is expected to deliver microsecond latency and terabit-per-second data rates.</p>",
       },
       {
-        title: "KTU Announces Updated Embedded Systems Curriculum",
-        categories: ["ACADEMIC"], pubDate: new Date(Date.now() - 7200000).toISOString(),
-        description: "Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum with heavier emphasis on modern IoT...",
-        content: "<p>Kerala Technological University has announced an impending revision to the B.Tech ECE curriculum. The new syllabus places a heavier emphasis on modern IoT frameworks.</p>",
-        link: "https://ktu.edu.in/"
+        title: "Updated Embedded Systems Industry Standards",
+        categories: ["INDUSTRY"], pubDate: new Date(Date.now() - 7200000).toISOString(),
+        description: "The embedded industry places a heavier emphasis on modern IoT frameworks and Edge AI processing...",
+        content: "<p>The embedded industry places a heavier emphasis on modern IoT frameworks, Edge AI processing, and real-time operating systems (RTOS), ensuring systems are equipped for Industry 4.0.</p><p>Hardware design is phasing out legacy 8-bit microcontrollers in favor of 32-bit ARM Cortex-M based architectures.</p>",
       }
     ];
 
@@ -208,15 +390,15 @@
     const Widget = ({ title, icon: Icon, children, className = "", noPadding = false, onClick }) => (
       <div 
         onClick={onClick}
-        className={`relative bg-white/90 dark:bg-slate-900/60 backdrop-blur-3xl border border-slate-200/80 dark:border-slate-800/80 rounded-3xl transition-all duration-300 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col h-full ${noPadding ? '' : 'p-6 md:p-8'} ${onClick ? 'cursor-pointer hover:-translate-y-1' : ''} ${className}`}
+        className={`relative bg-white/95 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-3xl transition-all duration-300 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col h-full ${noPadding ? '' : 'p-6 md:p-8'} ${onClick ? 'cursor-pointer hover:-translate-y-1' : ''} ${className}`}
       >
         {!noPadding && title && (
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/50">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/80 dark:border-slate-800/50">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-2xl group-hover:bg-violet-600 group-hover:text-white transition-colors duration-300">
+              <div className="p-2.5 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 rounded-2xl group-hover:bg-violet-600 group-hover:text-white transition-colors duration-300">
                 {Icon && <Icon className="w-5 h-5" />}
               </div>
-              <h3 className="font-semibold text-sm tracking-wide text-slate-800 dark:text-slate-200">
+              <h3 className="font-bold text-sm tracking-wide text-slate-900 dark:text-slate-100">
                 {title}
               </h3>
             </div>
@@ -253,42 +435,35 @@
       const saveTimetable = () => { localStorage.setItem('ece_timetable', JSON.stringify(schedule)); showToast("Timetable saved locally."); };
 
       const addPeriod = () => {
-        const newSch = {...schedule};
-        Object.keys(newSch).forEach(d => newSch[d].push(""));
-        setSchedule(newSch);
-        setNumPeriods(n => n + 1);
+        const newSch = {...schedule}; Object.keys(newSch).forEach(d => newSch[d].push("")); setSchedule(newSch); setNumPeriods(n => n + 1);
       };
 
       const removePeriod = () => {
-        if(numPeriods <= 1) return;
-        const newSch = {...schedule};
-        Object.keys(newSch).forEach(d => newSch[d].pop());
-        setSchedule(newSch);
-        setNumPeriods(n => n - 1);
+        if(numPeriods <= 1) return; const newSch = {...schedule}; Object.keys(newSch).forEach(d => newSch[d].pop()); setSchedule(newSch); setNumPeriods(n => n - 1);
       };
 
       return (
         <div className="animate-in fade-in duration-700">
           <Widget title="Weekly Schedule" icon={Calendar}>
             <div className="flex justify-end space-x-2 mb-4">
-               <button onClick={addPeriod} className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">+ Add Period</button>
-               <button onClick={removePeriod} className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">- Remove Period</button>
-               <button onClick={saveTimetable} className="bg-violet-500 hover:bg-violet-600 text-white px-5 py-1.5 rounded-lg text-xs font-bold tracking-widest uppercase shadow-md transition-colors ml-4">Save</button>
+               <button onClick={addPeriod} className="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">+ Add Period</button>
+               <button onClick={removePeriod} className="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">- Remove Period</button>
+               <button onClick={saveTimetable} className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold tracking-widest uppercase shadow-md transition-colors ml-4">Save</button>
             </div>
             <div className="overflow-x-auto pb-4">
               <div style={{ minWidth: `${100 + (numPeriods * 140)}px` }}>
                 <div className="flex items-center space-x-4 mb-4 px-4">
                   <div className="w-20"></div>
                   {Array.from({length: numPeriods}).map((_, i) => (
-                    <div key={i} className="flex-1 text-center text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Period {i+1}</div>
+                    <div key={i} className="flex-1 text-center text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-400">Period {i+1}</div>
                   ))}
                 </div>
                 <div className="space-y-4">
                   {Object.keys(schedule).map(day => (
-                    <div key={day} className="flex items-center space-x-4 bg-slate-50/80 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50 transition-colors">
-                      <div className="w-20 font-bold text-sm text-slate-800 dark:text-slate-200 tracking-wider">{day}</div>
+                    <div key={day} className="flex items-center space-x-4 bg-slate-50/80 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/50 transition-colors">
+                      <div className="w-20 font-bold text-sm text-slate-900 dark:text-slate-200 tracking-wider">{day}</div>
                       {schedule[day].map((period, i) => (
-                        <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm font-semibold outline-none focus:border-violet-400 transition-all text-center text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm" placeholder="Free" />
+                        <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm font-bold outline-none focus:border-violet-500 transition-all text-center text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm" placeholder="Free" />
                       ))}
                     </div>
                   ))}
@@ -300,57 +475,66 @@
       );
     };
 
-    // --- NEWS FEED ---
+    // --- FRESH NEWS FEED ---
     const NewsHubView = ({ showToast }) => {
       const [news, setNews] = useState([]);
       const [loading, setLoading] = useState(true);
-      const [isLive, setIsLive] = useState(false);
       const [activeArticle, setActiveArticle] = useState(null);
       const [lastSync, setLastSync] = useState(new Date());
 
+      const RSS_FEEDS = [
+        'https://www.eetimes.com/feed/',
+        'https://hackaday.com/blog/feed/',
+        'https://spectrum.ieee.org/feeds/feed.rss',
+        'https://www.electronicsweekly.com/feed/'
+      ];
+
+      const fetchFreshNews = async () => {
+        setLoading(true); 
+        try {
+          const randomFeed = RSS_FEEDS[Math.floor(Math.random() * RSS_FEEDS.length)];
+          const targetUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(randomFeed + '?t=' + Date.now())}`;
+          
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000); 
+          const response = await fetch(targetUrl, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) throw new Error("Network error");
+          const data = await response.json();
+          
+          if (data?.status === 'ok' && Array.isArray(data.items)) {
+            const cleanNews = data.items.filter(item => !item.title.toLowerCase().includes('sponsor') && !item.description.toLowerCase().includes('sponsor'));
+            const shuffled = cleanNews.sort(() => 0.5 - Math.random()).slice(0, 9);
+            setNews(shuffled); setLastSync(new Date());
+          } else { throw new Error("Data parsing error"); }
+        } catch (err) {
+           showToast("Unable to fetch live feed. Please try again later.");
+           if (news.length === 0) setNews(FALLBACK_NEWS);
+        } finally { setLoading(false); }
+      };
+
       useEffect(() => {
-        let isMounted = true;
-        const fetchNews = async () => {
-          if (isMounted && news.length === 0) setLoading(true); 
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 6000); 
-            const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.eetimes.com/feed/', { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (!response.ok) throw new Error("Network error");
-            const data = await response.json();
-            if (isMounted) {
-              if (data?.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
-                const cleanNews = data.items.filter(item => !item.title.toLowerCase().includes('sponsor') && !item.description.toLowerCase().includes('sponsor'));
-                setNews(cleanNews.slice(0, 9)); setIsLive(true); setLastSync(new Date());
-              } else throw new Error("Data parsing error");
-            }
-          } catch (err) {
-            if (isMounted) { setNews(FALLBACK_NEWS); setIsLive(false); setLastSync(new Date()); }
-          } finally {
-            if (isMounted) setLoading(false);
-          }
-        };
-        fetchNews();
-        const intervalId = setInterval(fetchNews, 600000); 
-        return () => { isMounted = false; clearInterval(intervalId); };
-      }, [news.length]);
+        if (news.length === 0) fetchFreshNews();
+        const intervalId = setInterval(fetchFreshNews, 600000); 
+        return () => clearInterval(intervalId);
+      }, []);
 
       if (activeArticle) {
         const articleBody = activeArticle.content && activeArticle.content.length > 50 ? activeArticle.content : activeArticle.description || "No content available.";
         return (
           <div className="animate-in fade-in duration-500 h-full flex flex-col relative z-20">
-            <button onClick={() => setActiveArticle(null)} className="flex items-center space-x-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 mb-6 group w-fit bg-white/80 dark:bg-slate-900/60 px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-sm transition-all">
+            <button onClick={() => setActiveArticle(null)} className="flex items-center space-x-2 text-sm font-bold text-slate-800 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 mb-6 group w-fit bg-white/90 dark:bg-slate-900/80 px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-sm transition-all">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /><span>Back to Feed</span>
             </button>
-            <div className="flex-grow max-w-4xl mx-auto w-full bg-white/90 dark:bg-slate-900/80 backdrop-blur-3xl border border-slate-200/50 dark:border-slate-800/50 rounded-[2.5rem] shadow-xl overflow-hidden">
+            <div className="flex-grow max-w-4xl mx-auto w-full bg-white/95 dark:bg-slate-900/90 backdrop-blur-3xl border border-slate-200/80 dark:border-slate-800/80 rounded-[2.5rem] shadow-xl overflow-hidden">
               <div className="p-8 md:p-12 flex flex-col h-full">
-                <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-100 dark:border-slate-800">
-                  <span className="bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">{activeArticle.categories?.[0] || 'UPDATE'}</span>
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
+                <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+                  <span className="bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">{activeArticle.categories?.[0] || 'UPDATE'}</span>
+                  <span className="text-sm font-bold text-slate-600 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-800 dark:text-white">{activeArticle.title || "Untitled"}</h2>
-                <div className="news-content flex-grow text-lg text-slate-700 dark:text-slate-300 font-sans" dangerouslySetInnerHTML={{ __html: articleBody }} />
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-900 dark:text-white">{activeArticle.title || "Untitled"}</h2>
+                <div className="news-content flex-grow text-lg text-slate-800 dark:text-slate-300 font-sans" dangerouslySetInnerHTML={{ __html: articleBody }} />
               </div>
             </div>
           </div>
@@ -359,44 +543,39 @@
 
       return (
         <div className="animate-in fade-in duration-700 h-full flex flex-col">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-slate-200/60 dark:border-slate-800/60 pb-6 gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-slate-300/60 dark:border-slate-800/60 pb-6 gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-slate-800 dark:text-white">Tech News Feed</h2>
-              <div className="flex items-center space-x-3 mt-2 text-slate-600 dark:text-slate-400">
-                <p className="text-sm font-medium">Industry Updates</p><span className="opacity-50">•</span>
-                <p className="text-xs font-mono flex items-center"><RefreshCw className="w-3 h-3 mr-1.5 opacity-70" /> Auto-sync</p>
-              </div>
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Tech News Feed</h2>
             </div>
-            <div className="flex flex-col items-start sm:items-end space-y-2">
-              <div className={`flex items-center space-x-2 border px-4 py-2 rounded-full shadow-sm transition-colors ${isLive ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' : 'bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'}`}>
-                {isLive ? <Radio className="w-4 h-4 animate-blink" /> : <Database className="w-4 h-4" />}
-                <span className="text-xs font-bold uppercase tracking-wider">{isLive ? 'Live Feed' : 'Offline Mode'}</span>
-              </div>
-              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-widest pl-2 pr-1">Updated: {lastSync.toLocaleTimeString()}</span>
+            <div className="flex items-center space-x-4">
+               <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Updated: {lastSync.toLocaleTimeString()}</span>
+               <button onClick={fetchFreshNews} disabled={loading} className="flex items-center space-x-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-full shadow-md transition-colors disabled:opacity-50">
+                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                 <span className="text-xs font-bold uppercase tracking-wider">Refresh Feed</span>
+               </button>
             </div>
           </div>
           {loading ? (
             <div className="flex-grow flex items-center justify-center">
               <div className="flex flex-col items-center space-y-6">
-                 <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-800 border-t-violet-500 dark:border-t-violet-400 rounded-full animate-spin"></div>
+                 <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-800 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin"></div>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
               {news.map((item, index) => (
-                <div key={index} onClick={() => setActiveArticle(item)} className="bg-white/90 dark:bg-slate-900/50 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/60 overflow-hidden rounded-3xl group cursor-pointer hover:-translate-y-1 transition-all shadow-sm hover:shadow-lg flex flex-col h-full">
+                <div key={index} onClick={() => setActiveArticle(item)} className="bg-white/95 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden rounded-3xl group cursor-pointer hover:-translate-y-1 transition-all shadow-sm hover:shadow-lg flex flex-col h-full">
                    <div className="p-6 md:p-8 flex flex-col h-full justify-between">
                      <div>
                        <div className="flex justify-between items-center mb-5">
-                         <span className={`text-xs font-bold tracking-wider px-3 py-1 rounded-full ${index === 0 ? 'bg-violet-500 text-white shadow-md' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
+                         <span className={`text-xs font-bold tracking-wider px-3 py-1 rounded-full ${index === 0 ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300'}`}>
                            {item.categories?.[0] || 'UPDATE'}
                          </span>
-                         <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{item.pubDate ? new Date(item.pubDate).toLocaleDateString([], {month: 'short', day: 'numeric'}) : ''}</span>
                        </div>
-                       <h3 className="text-lg font-bold leading-snug text-slate-800 dark:text-slate-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-3">{item.title}</h3>
-                       <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">{extractSnippet(item.description)}</p>
+                       <h3 className="text-lg font-bold leading-snug text-slate-900 dark:text-slate-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-3">{item.title}</h3>
+                       <p className="mt-4 text-sm text-slate-700 dark:text-slate-400 line-clamp-3 leading-relaxed">{extractSnippet(item.description)}</p>
                      </div>
-                     <div className="mt-8 pt-5 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between text-violet-600 dark:text-violet-400 font-medium">
+                     <div className="mt-8 pt-5 border-t border-slate-200 dark:border-slate-800/50 flex items-center justify-between text-violet-600 dark:text-violet-400 font-bold">
                        <span className="text-sm">Read More</span><ChevronRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
                      </div>
                    </div>
@@ -438,17 +617,17 @@
                  <div className="absolute inset-0 rounded-full bg-violet-50 dark:bg-violet-500/5 group-hover:scale-105 transition-transform duration-500"></div>
                  <svg className="absolute inset-0 w-full h-full -rotate-90 z-10" viewBox="0 0 100 100">
                    <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-200 dark:text-slate-800" />
-                   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="4" className="text-violet-500 transition-all duration-1000 ease-linear" strokeDasharray="301.59" strokeDashoffset={301.59 - (301.59 * timeLeft) / (25 * 60)} strokeLinecap="round" />
+                   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="4" className="text-violet-600 transition-all duration-1000 ease-linear" strokeDasharray="301.59" strokeDashoffset={301.59 - (301.59 * timeLeft) / (25 * 60)} strokeLinecap="round" />
                  </svg>
-                 <div className="text-6xl font-light font-mono tracking-tighter text-slate-800 dark:text-white z-20">
+                 <div className="text-6xl font-light font-mono tracking-tighter text-slate-900 dark:text-white z-20">
                     {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
                  </div>
                </div>
                <div className="flex space-x-4 w-full">
-                 <button onClick={() => setIsActive(!isActive)} className="flex-1 bg-violet-500 hover:bg-violet-600 text-white py-4 rounded-2xl text-sm font-bold tracking-wide active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-violet-500/20">
+                 <button onClick={() => setIsActive(!isActive)} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-4 rounded-2xl text-sm font-bold tracking-wide active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-violet-500/20">
                    {isActive ? <Pause className="w-5 h-5 mr-2 fill-current"/> : <Play className="w-5 h-5 mr-2 fill-current"/>} {isActive ? 'Pause' : 'Start'}
                  </button>
-                 <button onClick={() => {setIsActive(false); setTimeLeft(25*60);}} className="px-6 border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-600 dark:text-slate-400 rounded-2xl transition-colors flex items-center justify-center bg-white dark:bg-slate-900">
+                 <button onClick={() => {setIsActive(false); setTimeLeft(25*60);}} className="px-6 border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-400 rounded-2xl transition-colors flex items-center justify-center bg-white dark:bg-slate-900">
                    <RotateCcw className="w-5 h-5" />
                  </button>
                </div>
@@ -458,15 +637,15 @@
           <Widget title="Tasks & Assignments" icon={ListTodo}>
             <div className="flex flex-col h-full">
               <div className="relative mb-6">
-                <input type="text" placeholder="Add new task... (Press Enter)" value={newTask} onChange={(e) => setNewTask(e.target.value)} onKeyDown={addTask} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 px-5 text-sm outline-none focus:border-violet-400 transition-all text-slate-800 dark:text-slate-200 placeholder:text-slate-500 shadow-sm" />
+                <input type="text" placeholder="Add new task... (Press Enter)" value={newTask} onChange={(e) => setNewTask(e.target.value)} onKeyDown={addTask} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 px-5 text-sm font-semibold outline-none focus:border-violet-500 transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-500 shadow-sm" />
               </div>
               <div className="space-y-3 overflow-y-auto max-h-[350px] pr-2">
                 {tasks.map(task => (
-                  <div key={task.id} className={`flex items-start space-x-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${task.done ? 'bg-slate-50 border-slate-50 dark:bg-slate-900/30 dark:border-slate-800/30 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-violet-300 dark:hover:border-violet-800'}`} onClick={() => toggleTask(task.id)}>
+                  <div key={task.id} className={`flex items-start space-x-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${task.done ? 'bg-slate-50 border-slate-50 dark:bg-slate-900/30 dark:border-slate-800/30 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700'}`} onClick={() => toggleTask(task.id)}>
                     <button className="mt-0.5 shrink-0 transition-transform hover:scale-110">
-                      {task.done ? <CheckCircle className="w-6 h-6 text-emerald-500" /> : <Circle className="w-6 h-6 text-slate-300 dark:text-slate-600" />}
+                      {task.done ? <CheckCircle className="w-6 h-6 text-emerald-500" /> : <Circle className="w-6 h-6 text-slate-400 dark:text-slate-600" />}
                     </button>
-                    <span className={`text-sm leading-relaxed pt-0.5 font-medium ${task.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'}`}>{task.text}</span>
+                    <span className={`text-sm leading-relaxed pt-0.5 font-bold ${task.done ? 'line-through text-slate-500' : 'text-slate-900 dark:text-slate-200'}`}>{task.text}</span>
                   </div>
                 ))}
               </div>
@@ -476,14 +655,40 @@
       );
     };
 
-    // --- ENGINEERING TOOLS ---
+    // --- ENGINEERING TOOLS (14 Tools including 4 New Ones) ---
     const ToolsView = () => {
-      const [activeTool, setActiveTool] = useState('resistor');
+      const [activeTool, setActiveTool] = useState('bjt'); // Start with new tool
 
+      // Existing Tools State
       const [bands, setBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[2]]); 
       const resValue = useMemo(() => (bands[0].val * 10 + bands[1].val) * bands[2].mult, [bands]);
       const [indBands, setIndBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[1]]); 
       const indValue = useMemo(() => (indBands[0].val * 10 + indBands[1].val) * indBands[2].mult, [indBands]);
+      const [bases, setBases] = useState({ dec: '255', bin: '11111111', hex: 'FF' });
+      const [rFreq, setRFreq] = useState(50); const [rL, setRL] = useState(10); const [rC, setRC] = useState(10);
+      const [opRf, setOpRf] = useState(10); const [opRin, setOpRin] = useState(1);
+      const [ledVs, setLedVs] = useState(5); const [ledVf, setLedVf] = useState(2); const [ledIf, setLedIf] = useState(20);
+      const [pwrV, setPwrV] = useState(12); const [pwrI, setPwrI] = useState(2);
+      const [dbV1, setDbV1] = useState(1); const [dbV2, setDbV2] = useState(10);
+      const [waveF, setWaveF] = useState(300);
+      const [awgSel, setAwgSel] = useState(20); const awgData = AWG_DATA.find(a => a.awg === Number(awgSel)) || AWG_DATA[0];
+      const [tCurr, setTCurr] = useState(1); const [tThick, setTThick] = useState(1);
+      const [vdV, setVdV] = useState(12); const [vdR1, setVdR1] = useState(1000); const [vdR2, setVdR2] = useState(2000);
+      const [rcR, setRcR] = useState(10); const [rcC, setRcC] = useState(100);
+      const [t5R1, setT5R1] = useState(1); const [t5R2, setT5R2] = useState(10); const [t5C, setT5C] = useState(10);
+
+      // New Tools State
+      const [bjtVcc, setBjtVcc] = useState(12);
+      const [bjtRc, setBjtRc] = useState(2);
+      const [bjtRb, setBjtRb] = useState(470);
+      const [bjtBeta, setBjtBeta] = useState(100);
+
+      const [rlcR, setRlcR] = useState(100);
+      const [rlcL, setRlcL] = useState(100);
+      const [rlcC, setRlcC] = useState(10);
+      const [rlcF, setRlcF] = useState(50);
+
+      const [lineCode, setLineCode] = useState("10110");
 
       const formatUnit = (val, unit) => {
         if (val >= 1e6) return (val / 1e6).toFixed(2) + ' M' + unit;
@@ -491,69 +696,52 @@
         return val.toFixed(2) + ' ' + unit;
       };
 
-      const [bases, setBases] = useState({ dec: '255', bin: '11111111', hex: 'FF' });
       const updateBases = (val, base) => {
         if (!val) { setBases({ dec: '', bin: '', hex: '' }); return; }
-        try {
-          const parsed = parseInt(val, base); if (isNaN(parsed)) return;
-          setBases({ dec: parsed.toString(10), bin: parsed.toString(2), hex: parsed.toString(16).toUpperCase() });
-        } catch(e) {}
+        try { const parsed = parseInt(val, base); if (isNaN(parsed)) return; setBases({ dec: parsed.toString(10), bin: parsed.toString(2), hex: parsed.toString(16).toUpperCase() }); } catch(e) {}
       };
 
-      const [rFreq, setRFreq] = useState(50);
-      const [rL, setRL] = useState(10);
-      const [rC, setRC] = useState(10);
-      const [opRf, setOpRf] = useState(10);
-      const [opRin, setOpRin] = useState(1);
-      const [ledVs, setLedVs] = useState(5);
-      const [ledVf, setLedVf] = useState(2);
-      const [ledIf, setLedIf] = useState(20);
-      const [pwrV, setPwrV] = useState(12);
-      const [pwrI, setPwrI] = useState(2);
-      const [dbV1, setDbV1] = useState(1);
-      const [dbV2, setDbV2] = useState(10);
-      const [waveF, setWaveF] = useState(300);
-      const [awgSel, setAwgSel] = useState(20);
-      const awgData = AWG_DATA.find(a => a.awg === Number(awgSel)) || AWG_DATA[0];
-      const [tCurr, setTCurr] = useState(1);
-      const [tThick, setTThick] = useState(1);
+      const t5Freq = useMemo(() => { if(t5R1===0 && t5R2===0) return 0; return 1.44 / (((t5R1*1000) + 2*(t5R2*1000)) * (t5C/1000000)); }, [t5R1, t5R2, t5C]);
+      const t5Duty = useMemo(() => { if(t5R1===0 && t5R2===0) return 0; return ((t5R1 + t5R2) / (t5R1 + 2*t5R2)) * 100; }, [t5R1, t5R2]);
 
-      // 555 Timer specific
-      const [t5R1, setT5R1] = useState(1);
-      const [t5R2, setT5R2] = useState(10);
-      const [t5C, setT5C] = useState(10);
-      const t5Freq = useMemo(() => {
-         if(t5R1===0 && t5R2===0) return 0;
-         return 1.44 / (((t5R1*1000) + 2*(t5R2*1000)) * (t5C/1000000));
-      }, [t5R1, t5R2, t5C]);
-      const t5Duty = useMemo(() => {
-         if(t5R1===0 && t5R2===0) return 0;
-         return ((t5R1 + t5R2) / (t5R1 + 2*t5R2)) * 100;
-      }, [t5R1, t5R2]);
+      // BJT Calculations
+      const bjtIb = (bjtVcc - 0.7) / (bjtRb * 1000); // Amps
+      const bjtIc = Math.min(bjtBeta * bjtIb, bjtVcc / (bjtRc * 1000)); // Amps (clamped by saturation)
+      const bjtVce = Math.max(0, bjtVcc - (bjtIc * (bjtRc * 1000))); // Volts
+
+      // Phasor Calculations
+      const xl = 2 * Math.PI * rlcF * (rlcL/1000);
+      const xc = 1 / (2 * Math.PI * rlcF * (rlcC/1e6));
+      const z = Math.sqrt(rlcR*rlcR + Math.pow(xl-xc, 2));
 
       const TOOL_TABS = [
-        { id: 'resistor', label: 'Resistor Decoder', icon: Layers },
-        { id: 'inductor', label: 'Inductor Decoder', icon: Layers },
-        { id: 'base', label: 'Base Converter', icon: Hash },
+        { id: 'bjt', label: 'BJT Load Line', icon: TrendingUp },
+        { id: 'phasor', label: 'RLC Phasor', icon: Compass }, // Will fallback to Circle
+        { id: 'linecode', label: 'Digital Coding', icon: BarChart },
+        { id: 'resistor', label: 'Resistor Code', icon: Layers },
+        { id: 'inductor', label: 'Inductor Code', icon: Layers },
+        { id: 'divider', label: 'Voltage Divider', icon: Zap },
+        { id: 'rctime', label: 'RC Time Constant', icon: Clock },
         { id: 'reactance', label: 'Reactance Calc', icon: Zap },
         { id: 'opamp', label: 'Op-Amp Gain', icon: Activity },
         { id: 'led', label: 'LED Resistor', icon: Sun },
-        { id: 'power', label: 'Power Calculator', icon: Zap },
+        { id: 'power', label: 'Power Calc', icon: Zap },
         { id: 'db', label: 'Decibel (dB)', icon: Sliders },
         { id: 'wavelength', label: 'Wavelength', icon: Radio },
         { id: 'awg', label: 'AWG Lookup', icon: Hash },
-        { id: 'trace', label: 'PCB Trace Width', icon: Terminal },
-        { id: 'timer555', label: '555 Timer Calc', icon: Clock }
+        { id: 'trace', label: 'PCB Trace', icon: Terminal },
+        { id: 'timer555', label: '555 Timer', icon: Clock },
+        { id: 'base', label: 'Base Converter', icon: Hash }
       ];
 
       return (
         <div className="space-y-6 animate-in fade-in duration-700">
-          <div className="bg-white/90 dark:bg-slate-900/60 p-2 border border-slate-200/80 dark:border-slate-800/60 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
+          <div className="bg-white/95 dark:bg-slate-900/80 p-2 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
             {TOOL_TABS.map(tab => (
               <button 
                 key={tab.id} onClick={() => setActiveTool(tab.id)} 
-                className={`flex items-center space-x-2 text-xs font-semibold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${
-                  activeTool === tab.id ? 'bg-violet-500 text-white shadow-md scale-105' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                className={`flex items-center space-x-2 text-xs font-bold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${
+                  activeTool === tab.id ? 'bg-violet-600 text-white shadow-md scale-105' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 <tab.icon className="w-3.5 h-3.5" /><span>{tab.label}</span>
@@ -562,10 +750,132 @@
           </div>
 
           <div className="mt-8">
+            
+            {/* NEW: BJT Load Line */}
+            {activeTool === 'bjt' && (
+              <Widget title="BJT DC Load Line & Q-Point" icon={TrendingUp}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Supply Voltage Vcc (V)</label><input type="number" value={bjtVcc} onChange={e=>setBjtVcc(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Collector Resistor Rc (kΩ)</label><input type="number" value={bjtRc} onChange={e=>setBjtRc(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Base Resistor Rb (kΩ)</label><input type="number" value={bjtRb} onChange={e=>setBjtRb(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Current Gain Beta</label><input type="number" value={bjtBeta} onChange={e=>setBjtBeta(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700 shadow-inner relative overflow-hidden">
+                      <div className="absolute top-4 left-4 text-xs font-bold text-slate-400">Load Line Graph</div>
+                      <svg viewBox="-10 -10 120 120" className="w-full h-full overflow-visible mt-4">
+                        {/* Axes */}
+                        <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
+                        <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
+                        <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 font-bold">Vce (V)</text>
+                        <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 font-bold">Ic (mA)</text>
+                        
+                        {/* Load Line */}
+                        {bjtVcc > 0 && bjtRc > 0 && (
+                          <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="2 2" className="opacity-70" /> // Simplified visual scale
+                        )}
+                        
+                        {/* Scaled Load Line (0 to Vcc on X, 0 to Vcc/Rc on Y) */}
+                        <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" />
+                        
+                        {/* Q-Point */}
+                        <circle cx={(bjtVce/bjtVcc)*100 || 0} cy={100 - ((bjtIc*1000)/(bjtVcc/bjtRc))*100 || 0} r="4" fill="#10B981" className="shadow-xl" />
+                        
+                        <text x="50" y="-15" fill="currentColor" fontSize="6" textAnchor="middle" className="font-mono text-emerald-500 font-bold">
+                          Q-Point: {bjtVce.toFixed(2)}V, {(bjtIc*1000).toFixed(2)}mA
+                        </text>
+                      </svg>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {/* NEW: RLC Phasor Diagram */}
+            {activeTool === 'phasor' && (
+              <Widget title="RLC Phasor Diagram" icon={Globe}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistance (Ω)</label><input type="number" value={rlcR} onChange={e=>setRlcR(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Inductance (mH)</label><input type="number" value={rlcL} onChange={e=>setRlcL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Capacitance (µF)</label><input type="number" value={rlcC} onChange={e=>setRlcC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Frequency (Hz)</label><input type="number" value={rlcF} onChange={e=>setRlcF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                    </div>
+                    <div className="bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-800 shadow-xl overflow-hidden relative">
+                      <svg viewBox="-100 -100 200 200" className="w-full h-full overflow-visible">
+                        {/* Axes */}
+                        <line x1="-100" y1="0" x2="100" y2="0" stroke="#334155" strokeWidth="1" strokeDasharray="4 4"/>
+                        <line x1="0" y1="-100" x2="0" y2="100" stroke="#334155" strokeWidth="1" strokeDasharray="4 4"/>
+                        
+                        {/* Scale vectors relative to max */}
+                        {(() => {
+                          const max = Math.max(rlcR, xl, xc) || 1;
+                          const sR = (rlcR / max) * 80;
+                          const sXL = (xl / max) * 80;
+                          const sXC = (xc / max) * 80;
+                          return (
+                            <g>
+                              {/* R (Right) */}
+                              <line x1="0" y1="0" x2={sR} y2="0" stroke="#10B981" strokeWidth="4" markerEnd="url(#arrow)"/>
+                              <text x={sR + 10} y="5" fill="#10B981" fontSize="12" fontWeight="bold">R</text>
+                              {/* XL (Up - negative Y) */}
+                              <line x1="0" y1="0" x2="0" y2={-sXL} stroke="#3B82F6" strokeWidth="4" />
+                              <text x="-20" y={-sXL - 5} fill="#3B82F6" fontSize="12" fontWeight="bold">XL</text>
+                              {/* XC (Down - positive Y) */}
+                              <line x1="0" y1="0" x2="0" y2={sXC} stroke="#EC4899" strokeWidth="4" />
+                              <text x="-20" y={sXC + 15} fill="#EC4899" fontSize="12" fontWeight="bold">XC</text>
+                              {/* Z (Resultant) */}
+                              <line x1="0" y1="0" x2={sR} y2={sXC - sXL} stroke="#F59E0B" strokeWidth="2" strokeDasharray="2 2" />
+                              <circle cx={sR} cy={sXC - sXL} r="4" fill="#F59E0B" />
+                            </g>
+                          )
+                        })()}
+                      </svg>
+                      <div className="absolute bottom-4 left-4 text-xs font-mono text-white">Z = {z.toFixed(2)} Ω</div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {/* NEW: Digital Line Coding */}
+            {activeTool === 'linecode' && (
+              <Widget title="Digital Line Coding" icon={BarChart}>
+                 <div className="grid grid-cols-1 gap-8 py-4">
+                    <div>
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Binary Data Sequence</label>
+                      <input type="text" value={lineCode} onChange={e=>setLineCode(e.target.value.replace(/[^01]/g, ''))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 mt-2 text-2xl font-mono tracking-widest outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" />
+                    </div>
+                    
+                    <div className="space-y-6">
+                      {/* NRZ-L */}
+                      <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">NRZ-L (Non-Return-to-Zero Level)</div>
+                        <svg viewBox={`0 0 ${lineCode.length * 40 || 40} 40`} className="w-full h-16 overflow-visible">
+                          <path d={`M 0,${lineCode[0]==='1'?0:40} ` + lineCode.split('').map((b,i) => `L ${i*40},${b==='1'?0:40} L ${(i+1)*40},${b==='1'?0:40}`).join(' ')} fill="none" stroke="#8B5CF6" strokeWidth="3" strokeLinejoin="round" />
+                          {lineCode.split('').map((b,i) => <text key={i} x={i*40 + 20} y="-10" fill="currentColor" fontSize="10" className="text-slate-400" textAnchor="middle">{b}</text>)}
+                        </svg>
+                      </div>
+
+                      {/* Manchester */}
+                      <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Manchester (IEEE 802.3)</div>
+                        <svg viewBox={`0 0 ${lineCode.length * 40 || 40} 40`} className="w-full h-16 overflow-visible">
+                          <path d={`M 0,${lineCode[0]==='1'?0:40} ` + lineCode.split('').map((b,i) => {
+                            if(b==='1') return `L ${i*40},0 L ${i*40 + 20},0 L ${i*40 + 20},40 L ${(i+1)*40},40`;
+                            else return `L ${i*40},40 L ${i*40 + 20},40 L ${i*40 + 20},0 L ${(i+1)*40},0`;
+                          }).join(' ')} fill="none" stroke="#10B981" strokeWidth="3" strokeLinejoin="round" />
+                          {lineCode.split('').map((b,i) => <text key={i} x={i*40 + 20} y="-10" fill="currentColor" fontSize="10" className="text-slate-400" textAnchor="middle">{b}</text>)}
+                        </svg>
+                      </div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {/* Existing Tools Follow... */}
             {activeTool === 'resistor' && (
               <Widget title="4-Band Resistor Decoder" icon={Layers}>
                  <div className="flex flex-col items-center py-4">
-                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-800 dark:text-white mb-8">{formatUnit(resValue, 'Ω')}</div>
+                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-900 dark:text-white mb-8">{formatUnit(resValue, 'Ω')}</div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
                     {[0, 1, 2].map(bIdx => (
                       <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
@@ -582,7 +892,7 @@
             {activeTool === 'inductor' && (
               <Widget title="Inductor Color Decoder" icon={Layers}>
                  <div className="flex flex-col items-center py-4">
-                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-800 dark:text-white mb-8">{formatUnit(indValue, 'µH')}</div>
+                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-900 dark:text-white mb-8">{formatUnit(indValue, 'µH')}</div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
                     {[0, 1, 2].map(bIdx => (
                       <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
@@ -596,20 +906,51 @@
               </Widget>
             )}
 
+            {activeTool === 'divider' && (
+              <Widget title="Voltage Divider Calculator" icon={Zap}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Input Voltage (Vin)</label><input type="number" value={vdV} onChange={e=>setVdV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistor R1 (Ohms)</label><input type="number" value={vdR1} onChange={e=>setVdR1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistor R2 (Ohms)</label><input type="number" value={vdR2} onChange={e=>setVdR2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                    </div>
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Output Voltage (Vout)</div>
+                      <div className="text-6xl font-mono font-bold">{(vdR1+vdR2)>0 ? (vdV * (vdR2 / (vdR1+vdR2))).toFixed(2) : 0} V</div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
+            {activeTool === 'rctime' && (
+              <Widget title="RC Time Constant Calculator" icon={Clock}>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                    <div className="space-y-4">
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistance (kΩ)</label><input type="number" value={rcR} onChange={e=>setRcR(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Capacitance (µF)</label><input type="number" value={rcC} onChange={e=>setRcC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                    </div>
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Time Constant (Tau)</div><div className="text-4xl font-mono font-bold">{((rcR*1000)*(rcC/1e6)).toFixed(3)} s</div></div>
+                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Full Charge (5*Tau)</div><div className="text-3xl font-mono font-bold">{(5*(rcR*1000)*(rcC/1e6)).toFixed(3)} s</div></div>
+                    </div>
+                 </div>
+              </Widget>
+            )}
+
             {activeTool === 'base' && (
               <Widget title="Number System Converter" icon={Hash}>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
                     <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 block">Decimal (Base 10)</label>
-                      <input type="text" value={bases.dec} onChange={e => updateBases(e.target.value, 10)} className="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-700 py-2 text-2xl font-mono outline-none focus:border-violet-500 text-slate-800 dark:text-white" />
+                      <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-4 block">Decimal (Base 10)</label>
+                      <input type="text" value={bases.dec} onChange={e => updateBases(e.target.value, 10)} className="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-600 py-2 text-2xl font-mono font-bold outline-none focus:border-violet-500 text-slate-900 dark:text-white" />
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
                       <label className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-4 block">Binary (Base 2)</label>
-                      <input type="text" value={bases.bin} onChange={e => updateBases(e.target.value, 2)} className="w-full bg-transparent border-b-2 border-sky-300 dark:border-sky-800 py-2 text-2xl font-mono outline-none focus:border-sky-500 text-sky-600 dark:text-sky-400" />
+                      <input type="text" value={bases.bin} onChange={e => updateBases(e.target.value, 2)} className="w-full bg-transparent border-b-2 border-sky-300 dark:border-sky-700 py-2 text-2xl font-mono font-bold outline-none focus:border-sky-500 text-sky-600 dark:text-sky-400" />
                     </div>
                     <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
                       <label className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider mb-4 block">Hexadecimal (Base 16)</label>
-                      <input type="text" value={bases.hex} onChange={e => updateBases(e.target.value, 16)} className="w-full bg-transparent border-b-2 border-pink-300 dark:border-pink-800 py-2 text-2xl font-mono outline-none focus:border-pink-500 text-pink-600 dark:text-pink-400 uppercase" />
+                      <input type="text" value={bases.hex} onChange={e => updateBases(e.target.value, 16)} className="w-full bg-transparent border-b-2 border-pink-300 dark:border-pink-700 py-2 text-2xl font-mono font-bold outline-none focus:border-pink-500 text-pink-600 dark:text-pink-400 uppercase" />
                     </div>
                  </div>
               </Widget>
@@ -619,13 +960,13 @@
               <Widget title="Reactance Calculator" icon={Zap}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Frequency (Hz)</label><input type="number" value={rFreq} onChange={e=>setRFreq(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Inductance (mH)</label><input type="number" value={rL} onChange={e=>setRL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Capacitance (µF)</label><input type="number" value={rC} onChange={e=>setRC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Frequency (Hz)</label><input type="number" value={rFreq} onChange={e=>setRFreq(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Inductance (mH)</label><input type="number" value={rL} onChange={e=>setRL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Capacitance (µF)</label><input type="number" value={rC} onChange={e=>setRC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
-                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Inductive Reactance (XL)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{(2 * Math.PI * rFreq * (rL/1000)).toFixed(2)} Ω</div></div>
-                      <div><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Capacitive Reactance (XC)</div><div className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{(rFreq && rC ? (1 / (2 * Math.PI * rFreq * (rC/1e6))) : 0).toFixed(2)} Ω</div></div>
+                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Inductive Reactance (XL)</div><div className="text-4xl font-mono font-bold">{(2 * Math.PI * rFreq * (rL/1000)).toFixed(2)} Ω</div></div>
+                      <div><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Capacitive Reactance (XC)</div><div className="text-4xl font-mono font-bold">{(rFreq && rC ? (1 / (2 * Math.PI * rFreq * (rC/1e6))) : 0).toFixed(2)} Ω</div></div>
                     </div>
                  </div>
               </Widget>
@@ -635,12 +976,12 @@
               <Widget title="Operational Amplifier" icon={Activity}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Feedback Resistor (Rf) kΩ</label><input type="number" value={opRf} onChange={e=>setOpRf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Input Resistor (Rin) kΩ</label><input type="number" value={opRin} onChange={e=>setOpRin(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Feedback Resistor (Rf) kΩ</label><input type="number" value={opRf} onChange={e=>setOpRf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Input Resistor (Rin) kΩ</label><input type="number" value={opRin} onChange={e=>setOpRin(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Inverting Gain</div><div className="text-4xl font-mono font-bold">-{opRin ? (opRf / opRin).toFixed(2) : 0}</div></div>
-                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Non-Inverting Gain</div><div className="text-4xl font-mono font-bold">+{opRin ? (1 + (opRf / opRin)).toFixed(2) : 0}</div></div>
+                    <div className="bg-slate-800 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-white shadow-xl">
+                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Inverting Gain</div><div className="text-4xl font-mono font-bold">-{opRin ? (opRf / opRin).toFixed(2) : 0}</div></div>
+                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Non-Inverting Gain</div><div className="text-4xl font-mono font-bold">+{opRin ? (1 + (opRf / opRin)).toFixed(2) : 0}</div></div>
                     </div>
                  </div>
               </Widget>
@@ -650,12 +991,12 @@
               <Widget title="LED Resistor" icon={Sun}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Source Voltage (Vs) V</label><input type="number" value={ledVs} onChange={e=>setLedVs(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">LED Forward Voltage (Vf) V</label><input type="number" value={ledVf} onChange={e=>setLedVf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">LED Forward Current (If) mA</label><input type="number" value={ledIf} onChange={e=>setLedIf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Source Voltage (Vs) V</label><input type="number" value={ledVs} onChange={e=>setLedVs(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">LED Forward Voltage (Vf) V</label><input type="number" value={ledVf} onChange={e=>setLedVf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">LED Forward Current (If) mA</label><input type="number" value={ledIf} onChange={e=>setLedIf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-amber-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
-                      <div className="text-xs font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-2">Required Resistor</div>
+                    <div className="bg-amber-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
+                      <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-2">Required Resistor</div>
                       <div className="text-6xl font-mono font-bold">{(ledIf && (ledVs > ledVf)) ? ((ledVs - ledVf) / (ledIf / 1000)).toFixed(0) : 0} Ω</div>
                     </div>
                  </div>
@@ -666,10 +1007,10 @@
               <Widget title="Power Calculator" icon={Zap}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Voltage (V)</label><input type="number" value={pwrV} onChange={e=>setPwrV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Current (I)</label><input type="number" value={pwrI} onChange={e=>setPwrI(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Voltage (V)</label><input type="number" value={pwrV} onChange={e=>setPwrV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Current (I)</label><input type="number" value={pwrI} onChange={e=>setPwrI(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
                       <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Power (P = V×I)</div><div className="text-5xl font-mono font-bold">{(pwrV * pwrI).toFixed(2)} W</div></div>
                       <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Resistance (R = V/I)</div><div className="text-3xl font-mono font-bold">{pwrI ? (pwrV / pwrI).toFixed(2) : 0} Ω</div></div>
                     </div>
@@ -681,12 +1022,12 @@
               <Widget title="Decibel Converter" icon={Sliders}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Input Value</label><input type="number" value={dbV1} onChange={e=>setDbV1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Output Value</label><input type="number" value={dbV2} onChange={e=>setDbV2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Input Value</label><input type="number" value={dbV1} onChange={e=>setDbV1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Output Value</label><input type="number" value={dbV2} onChange={e=>setDbV2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm text-slate-800 dark:text-white">
-                      <div className="mb-6"><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
-                      <div><div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
+                    <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm text-slate-900 dark:text-white">
+                      <div className="mb-6"><div className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
+                      <div><div className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
                     </div>
                  </div>
               </Widget>
@@ -696,9 +1037,9 @@
               <Widget title="Wavelength" icon={Radio}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Frequency (MHz)</label><input type="number" value={waveF} onChange={e=>setWaveF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Frequency (MHz)</label><input type="number" value={waveF} onChange={e=>setWaveF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
+                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
                       <div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">Wavelength (c/f)</div>
                       <div className="text-6xl font-mono font-bold">{(waveF && waveF > 0) ? (299.792 / waveF).toFixed(4) : 0} m</div>
                     </div>
@@ -711,13 +1052,13 @@
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
                       <div>
-                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Select AWG Size</label>
-                        <select value={awgSel} onChange={e=>setAwgSel(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 appearance-none text-slate-800 dark:text-white shadow-sm">
+                        <label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Select AWG Size</label>
+                        <select value={awgSel} onChange={e=>setAwgSel(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 appearance-none text-slate-900 dark:text-white font-bold shadow-sm">
                           {AWG_DATA.map(a => <option key={a.awg} value={a.awg}>AWG {a.awg}</option>)}
                         </select>
                       </div>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
                       <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Diameter</div><div className="text-4xl font-mono font-bold">{awgData.dia} mm</div></div>
                       <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Resistance</div><div className="text-4xl font-mono font-bold">{awgData.res} Ω/km</div></div>
                     </div>
@@ -729,10 +1070,10 @@
               <Widget title="PCB Trace Width" icon={Terminal}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Current (Amps)</label><input type="number" value={tCurr} onChange={e=>setTCurr(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Temp Rise (°C)</label><input type="number" value={tThick} onChange={e=>setTThick(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" placeholder="e.g. 10" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Current (Amps)</label><input type="number" value={tCurr} onChange={e=>setTCurr(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Temp Rise (°C)</label><input type="number" value={tThick} onChange={e=>setTThick(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" placeholder="e.g. 10" /></div>
                     </div>
-                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-800 dark:text-white">
+                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
                       <div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">Estimated Trace Width</div>
                       <div className="text-6xl font-mono font-bold">{tCurr && tThick ? ((tCurr / (0.048 * Math.pow(tThick, 0.44))) ** (1/0.725) / 1.378).toFixed(2) : 0} mm</div>
                     </div>
@@ -744,11 +1085,11 @@
               <Widget title="555 Timer Calculator (Astable)" icon={Clock}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                     <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Resistor R1 (kΩ)</label><input type="number" value={t5R1} onChange={e=>setT5R1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Resistor R2 (kΩ)</label><input type="number" value={t5R2} onChange={e=>setT5R2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
-                      <div><label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Capacitor C (µF)</label><input type="number" value={t5C} onChange={e=>setT5C(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-800 dark:text-white" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Resistor R1 (kΩ)</label><input type="number" value={t5R1} onChange={e=>setT5R1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Resistor R2 (kΩ)</label><input type="number" value={t5R2} onChange={e=>setT5R2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
+                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Capacitor C (µF)</label><input type="number" value={t5C} onChange={e=>setT5C(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-800 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
                       <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Frequency (f)</div><div className="text-4xl font-mono font-bold">{t5Freq.toFixed(2)} Hz</div></div>
                       <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Duty Cycle (D)</div><div className="text-4xl font-mono font-bold">{t5Duty.toFixed(1)} %</div></div>
                     </div>
@@ -767,19 +1108,20 @@
       const LAB_TABS = [
         { id: 'cro', label: 'Oscilloscope', icon: Monitor },
         { id: 'rect', label: 'Half-Wave Rectifier', icon: Activity },
+        { id: 'frect', label: 'Full-Wave Rectifier', icon: Activity },
         { id: 'zener', label: 'Zener Diode', icon: Activity },
         { id: 'ohms', label: "Ohm's Law", icon: Zap },
         { id: 'filter', label: 'Low Pass Filter', icon: Radio },
         { id: 'reson', label: 'Series Resonance', icon: Globe },
-        { id: 'diode', label: 'Diode V-I', icon: Activity },
+        { id: 'transformer', label: 'Transformer', icon: Layers },
         { id: 'gates', label: 'Boolean Logic', icon: GitBranch }
       ];
 
       return (
         <div className="space-y-6 animate-in fade-in duration-700">
-          <div className="bg-white/90 dark:bg-slate-900/60 p-2 border border-slate-200/80 dark:border-slate-800/60 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
+          <div className="bg-white/95 dark:bg-slate-900/80 p-2 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
             {LAB_TABS.map(tab => (
-              <button key={tab.id} onClick={() => setActiveLab(tab.id)} className={`flex items-center space-x-2 text-xs font-semibold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${ activeLab === tab.id ? 'bg-violet-500 text-white shadow-md scale-105' : 'text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400' }`}>
+              <button key={tab.id} onClick={() => setActiveLab(tab.id)} className={`flex items-center space-x-2 text-xs font-bold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${ activeLab === tab.id ? 'bg-violet-600 text-white shadow-md scale-105' : 'text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-300' }`}>
                 <tab.icon className="w-3.5 h-3.5" /><span>{tab.label}</span>
               </button>
             ))}
@@ -788,11 +1130,12 @@
           <div className="mt-8">
             {activeLab === 'cro' && <CROVisualizer animations={animations} />}
             {activeLab === 'rect' && <RectifierVisualizer animations={animations} />}
+            {activeLab === 'frect' && <FullRectifierVisualizer animations={animations} />}
             {activeLab === 'zener' && <ZenerVisualizer />}
             {activeLab === 'ohms' && <OhmsLawVisualizer />}
             {activeLab === 'filter' && <BodePlotVisualizer />}
             {activeLab === 'reson' && <ResonanceVisualizer />}
-            {activeLab === 'diode' && <DiodeVisualizer />}
+            {activeLab === 'transformer' && <TransformerVisualizer />}
             {activeLab === 'gates' && <LogicGatesVisualizer />}
           </div>
         </div>
@@ -834,8 +1177,8 @@
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
               </button>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
-              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Zap className="w-5 h-5 mr-3 text-violet-500" /> Signal Control</h4>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
+              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Zap className="w-5 h-5 mr-3 text-violet-600 dark:text-violet-500" /> Signal Control</h4>
               <div className="space-y-10">
                 <div>
                   <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600 dark:text-violet-400">{chA.amp}V</span></div>
@@ -897,8 +1240,8 @@
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
               </button>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
-              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-violet-500" /> AC Input Source</h4>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
+              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-violet-600 dark:text-violet-500" /> AC Input Source</h4>
               <div className="space-y-10">
                 <div>
                   <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600 dark:text-violet-400">{chA.amp}V</span></div>
@@ -907,6 +1250,68 @@
                 <div>
                   <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-violet-600 dark:text-violet-400">{chA.freq}Hz</span></div>
                   <input type="range" min="10" max="60" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||10})} className="text-violet-500" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const FullRectifierVisualizer = ({ animations }) => {
+      const [isPlaying, setIsPlaying] = useState(true);
+      const [chA, setChA] = useState({ amp: 4, freq: 20 });
+      const canvasRef = useRef(null); const animRef = useRef(null); const timeRef = useRef(0);
+
+      useEffect(() => {
+        const canvas = canvasRef.current; if (!canvas) return;
+        const ctx = canvas.getContext('2d'); if (!ctx) return;
+        const draw = () => {
+          const { width, height } = canvas; ctx.clearRect(0, 0, width, height);
+          if (isPlaying && animations) timeRef.current += 0.005;
+
+          ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; ctx.lineWidth = 2;
+          for (let x = 0; x < width; x++) {
+            const t = (x / width) * 0.1 + timeRef.current; 
+            const y = (height / 2) - (chA.amp * 20 * Math.sin(2 * Math.PI * chA.freq * t));
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          ctx.beginPath(); ctx.strokeStyle = '#EC4899'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+          for (let x = 0; x < width; x++) {
+            const t = (x / width) * 0.1 + timeRef.current; 
+            let val = Math.abs(Math.sin(2 * Math.PI * chA.freq * t));
+            const y = (height / 2) - (chA.amp * 20 * val);
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          animRef.current = requestAnimationFrame(draw);
+        };
+        animRef.current = requestAnimationFrame(draw);
+        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
+      }, [isPlaying, chA, animations]);
+
+      return (
+        <Widget title="Full-Wave Bridge Rectifier" icon={Activity}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-100 dark:bg-slate-950 border-4 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
+              <div className="absolute top-1/2 left-0 w-full h-px bg-pink-500/50"></div>
+              <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10" />
+              <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-pink-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
+                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+              </button>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
+              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-pink-600 dark:text-pink-500" /> AC Input Source</h4>
+              <div className="space-y-10">
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-pink-600 dark:text-pink-400">{chA.amp}V</span></div>
+                  <input type="range" min="1" max="6" step="0.5" value={chA.amp} onChange={e => setChA({...chA, amp: Number(e.target.value)||1})} className="text-pink-500" />
+                </div>
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-pink-600 dark:text-pink-400">{chA.freq}Hz</span></div>
+                  <input type="range" min="10" max="60" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||10})} className="text-pink-500" />
                 </div>
               </div>
             </div>
@@ -932,7 +1337,7 @@
       return (
         <Widget title="Zener Diode Breakdown" icon={Activity}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Breakdown Voltage (Vz)</span> <span className="text-violet-600 dark:text-violet-400">{vz.toFixed(1)} V</span></div>
                     <input type="range" min="2" max="9" step="0.5" value={vz} onChange={e => setVz(Number(e.target.value))} className="text-violet-500" />
@@ -943,10 +1348,10 @@
                   </div>
                   <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Reverse Current (Iz)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
+                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
                   <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
                   <line x1="100" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
@@ -969,7 +1374,7 @@
       return (
         <Widget title="Ohm's Law Verification" icon={Zap}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Voltage (V)</span> <span className="text-violet-600 dark:text-violet-400">{v.toFixed(1)} V</span></div>
                     <input type="range" min="0" max="20" step="1" value={v} onChange={e => setV(Number(e.target.value))} className="text-violet-500" />
@@ -980,10 +1385,10 @@
                   </div>
                   <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Current (I)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{i.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
+                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{i.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
                   <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
                   <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
@@ -1018,7 +1423,7 @@
       return (
         <Widget title="RC Low Pass Filter Bode Plot" icon={Radio}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Resistance (R)</span> <span className="text-violet-600 dark:text-violet-400">{r.toFixed(1)} kΩ</span></div>
                     <input type="range" min="0.1" max="10" step="0.1" value={r} onChange={e => setR(Number(e.target.value))} className="text-violet-500" />
@@ -1029,10 +1434,10 @@
                   </div>
                   <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Cutoff Freq (fc)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{fc.toFixed(1)} <span className="text-lg opacity-50">Hz</span></span>
+                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{fc.toFixed(1)} <span className="text-lg opacity-50">Hz</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
                   <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
                   <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
@@ -1067,7 +1472,7 @@
       return (
         <Widget title="Series RLC Resonance Curve" icon={Globe}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Inductance (L)</span> <span className="text-violet-600 dark:text-violet-400">{l.toFixed(1)} mH</span></div>
                     <input type="range" min="1" max="50" step="1" value={l} onChange={e => setL(Number(e.target.value))} className="text-violet-500" />
@@ -1078,10 +1483,10 @@
                   </div>
                   <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Resonant Freq (fr)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{fr.toFixed(0)} <span className="text-lg opacity-50">Hz</span></span>
+                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{fr.toFixed(0)} <span className="text-lg opacity-50">Hz</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
                   <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
                   <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
@@ -1090,6 +1495,43 @@
                   <path d={buildPath()} fill="none" stroke="#EAB308" strokeWidth="2.5" />
                   <line x1={(fr/2000)*100} y1="100" x2={(fr/2000)*100} y2="0" stroke="#ef4444" strokeWidth="0.5" strokeDasharray="2 2" />
                 </svg>
+              </div>
+          </div>
+        </Widget>
+      );
+    };
+
+    const TransformerVisualizer = () => {
+      const [np, setNp] = useState(100); 
+      const [ns, setNs] = useState(200); 
+      const [vp, setVp] = useState(120); 
+      
+      const vs = (vp * (ns / np)).toFixed(1);
+      const isStepUp = ns > np;
+
+      return (
+        <Widget title="Transformer Turns Ratio" icon={Layers}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Primary Turns (Np)</span> <span className="text-violet-600 dark:text-violet-400">{np}</span></div>
+                    <input type="range" min="10" max="500" step="10" value={np} onChange={e => setNp(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Secondary Turns (Ns)</span> <span className="text-violet-600 dark:text-violet-400">{ns}</span></div>
+                    <input type="range" min="10" max="500" step="10" value={ns} onChange={e => setNs(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Primary Voltage (Vp)</span> <span className="text-violet-600 dark:text-violet-400">{vp} V</span></div>
+                    <input type="range" min="10" max="240" step="10" value={vp} onChange={e => setVp(Number(e.target.value))} className="text-violet-500" />
+                  </div>
+              </div>
+              <div className="bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center p-8 shadow-inner text-slate-900 dark:text-slate-100">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Secondary Voltage (Vs)</div>
+                  <div className="text-6xl font-mono font-bold mb-4">{vs} V</div>
+                  <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${isStepUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                    {isStepUp ? 'Step-Up Transformer' : 'Step-Down Transformer'}
+                  </div>
               </div>
           </div>
         </Widget>
@@ -1111,17 +1553,17 @@
       return (
         <Widget title="Diode Forward Bias" icon={Activity}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-800 dark:text-slate-200">
+              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
                   <div>
                     <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Forward Voltage (Vd)</span> <span className="text-violet-600 dark:text-violet-400">{vd.toFixed(2)} V</span></div>
                     <input type="range" min="0" max="1" step="0.05" value={vd} onChange={e => setVd(Number(e.target.value))} className="text-violet-500" />
                   </div>
                   <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Forward Current (Id)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-800 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
+                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
                   </div>
               </div>
-              <div className="relative w-full h-[320px] bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
+              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
                 <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
                   <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
                   <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
@@ -1157,8 +1599,8 @@
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col justify-center items-center py-12 px-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl relative overflow-hidden shadow-sm">
               <div className="absolute top-6 right-6 flex space-x-3 z-20">
-                <button onClick={removeInput} disabled={inputs.length <= 2} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-600 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">-</span></button>
-                <button onClick={addInput} disabled={inputs.length >= 5} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-600 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">+</span></button>
+                <button onClick={removeInput} disabled={inputs.length <= 2} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-700 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">-</span></button>
+                <button onClick={addInput} disabled={inputs.length >= 5} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-700 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">+</span></button>
               </div>
               <div className="flex flex-wrap justify-center gap-6 mb-8 mt-10 z-10">
                 {inputs.map((val, idx) => (
@@ -1176,7 +1618,7 @@
                 { name: 'NAND', val: calcNAND, color: 'text-rose-600 dark:text-rose-500', bg: 'bg-rose-500' }, { name: 'NOR', val: calcNOR, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500' },
                 { name: 'XOR', val: calcXOR, color: 'text-purple-600 dark:text-purple-500', bg: 'bg-purple-500' }, { name: 'XNOR', val: calcXNOR, color: 'text-cyan-600 dark:text-cyan-500', bg: 'bg-cyan-500' }
               ].map(gate => (
-                <div key={gate.name} className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-3xl group hover:border-violet-300 dark:hover:border-violet-600 transition-colors duration-300 shadow-sm">
+                <div key={gate.name} className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-3xl group hover:border-violet-400 dark:hover:border-violet-600 transition-colors duration-300 shadow-sm">
                   <span className={`font-bold tracking-widest uppercase mb-4 ${gate.color}`}>{gate.name}</span>
                   <span className={`w-14 h-14 flex items-center justify-center rounded-2xl text-2xl font-mono transition-all duration-300 shadow-lg border border-slate-200 dark:border-slate-700 ${gate.val === 1 ? `${gate.bg} text-white scale-110 border-none` : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>{gate.val}</span>
                 </div>
@@ -1204,10 +1646,10 @@
                   {KTU_SUBJECTS.map((subj) => (
                     <div key={subj.code} className="flex justify-between items-center py-3 px-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-colors">
                       <div className="text-sm flex flex-col sm:flex-row sm:items-center">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 sm:mr-4">{subj.code}</span> 
+                        <span className="font-bold text-slate-900 dark:text-slate-200 sm:mr-4">{subj.code}</span> 
                         <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">{subj.name}</span>
                       </div>
-                      <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-5 text-base font-bold outline-none cursor-pointer focus:border-violet-500 transition-colors shadow-sm text-slate-800 dark:text-slate-200" value={grades[subj.code]} onChange={(e) => setGrades({...grades, [subj.code]: e.target.value})}>
+                      <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-5 text-base font-bold outline-none cursor-pointer focus:border-violet-500 transition-colors shadow-sm text-slate-900 dark:text-slate-200" value={grades[subj.code]} onChange={(e) => setGrades({...grades, [subj.code]: e.target.value})}>
                         {Object.keys(GRADES).map(g => <option key={g} value={g}>{g}</option>)}
                       </select>
                     </div>
@@ -1230,19 +1672,19 @@
           <div className="relative bg-white dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-10 flex flex-col h-full shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-all duration-700"></div>
             <div className="relative z-10 flex-grow">
-              <div className="inline-flex items-center space-x-2 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
+              <div className="inline-flex items-center space-x-2 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
                 <User className="w-3.5 h-3.5" /><span>Created By</span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-800 dark:text-white">{APP_CONFIG.creator}</h2>
-              <p className="text-lg font-medium text-slate-500 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-400" /> {APP_CONFIG.course}</p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-900 dark:text-white">{APP_CONFIG.creator}</h2>
+              <p className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-500 dark:text-slate-400" /> {APP_CONFIG.course}</p>
               <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 mb-8">
-                <p className="text-base leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
+                <p className="text-base leading-relaxed text-slate-800 dark:text-slate-300 font-medium">
                   This project was prepared as part of the mini-project for our first-year <strong>EE & IPR</strong> subject. Designed explicitly for the {APP_CONFIG.university} syllabus, this acts as a comprehensive academic companion.
                 </p>
               </div>
             </div>
             <div className="relative z-10 pt-8 border-t border-slate-200 dark:border-slate-800">
-              <a href={`mailto:${APP_CONFIG.email}`} className="inline-flex items-center space-x-3 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-violet-600 transition-colors">
+              <a href={`mailto:${APP_CONFIG.email}`} className="inline-flex items-center space-x-3 text-sm font-bold text-slate-800 dark:text-slate-300 hover:text-violet-600 transition-colors">
                 <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"><Mail className="w-4 h-4" /></div><span>{APP_CONFIG.email}</span>
               </a>
             </div>
@@ -1256,7 +1698,7 @@
                   {[
                     { id: 'dark', label: 'Deep Slate', icon: Moon },
                     { id: 'light', label: 'Soft Ivory', icon: Sun },
-                    { id: 'nothing', label: 'Matrix Grid', icon: Layers }
+                    { id: 'matrix', label: 'Matrix Grid', icon: Layers }
                   ].map(t => (
                     <button key={t.id} onClick={() => dispatch({ type: 'SET_THEME', payload: t.id })} className={`flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all duration-300 ${state.theme === t.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold shadow-sm' : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-violet-300 dark:hover:bg-slate-900'}`}>
                       <t.icon className="w-5 h-5" /><span className="text-sm uppercase tracking-wider">{t.label}</span>
@@ -1311,16 +1753,24 @@
 
       useEffect(() => {
         const root = document.documentElement;
-        root.classList.remove('light', 'dark', 'theme-nothing');
-        if (state.theme === 'dark') root.classList.add('dark');
-        else if (state.theme === 'light') root.classList.add('light');
-        else root.classList.add('dark', 'theme-nothing');
+        const body = document.body;
+        root.classList.remove('light', 'dark');
+        body.classList.remove('matrix');
+        
+        if (state.theme === 'dark') {
+          root.classList.add('dark');
+        } else if (state.theme === 'light') {
+          root.classList.add('light');
+        } else if (state.theme === 'matrix') {
+          root.classList.add('dark'); 
+          body.classList.add('matrix'); 
+        }
       }, [state.theme]);
 
       const getBackgroundClass = () => {
-        if (state.theme === 'nothing') return 'bg-matrix-dark';
-        if (state.theme === 'dark') return 'bg-ambient-dark text-white'; 
-        return 'bg-ambient-light text-slate-800';
+        if (state.theme === 'matrix') return 'bg-matrix';
+        if (state.theme === 'dark') return 'bg-ambient-dark'; 
+        return 'bg-ambient-light';
       };
 
       const TABS = [
@@ -1336,30 +1786,33 @@
       return (
         <div className={`min-h-screen flex flex-col ${getBackgroundClass()} selection:bg-violet-500 selection:text-white relative overflow-hidden`}>
           {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+          
+          <ContextAmbientEngine theme={state.theme} enabled={state.animations} activeTab={state.activeTab} />
 
           <div className={`fixed inset-0 bg-slate-900/30 backdrop-blur-md z-40 transition-all duration-500 ${state.isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}></div>
 
-          <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border-r border-slate-200/80 dark:border-slate-800/80 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-2xl ${state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border-r border-slate-200/50 dark:border-slate-800/50 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-2xl ${state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="p-6 md:p-8 flex justify-between items-center border-b border-slate-200/80 dark:border-slate-800/80">
                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30"><Cpu className="w-6 h-6" /></div>
                   <div className="flex flex-col">
-                    <span className="font-bold tracking-widest uppercase text-lg text-slate-800 dark:text-white leading-none">ECE Hub</span>
+                    <span className="font-bold tracking-widest uppercase text-lg text-slate-900 dark:text-white leading-none">ECE Hub</span>
                   </div>
                </div>
-               <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-2.5 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
+               <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-2.5 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 transition-colors"><X className="w-5 h-5" /></button>
             </div>
 
-            <div className="flex-grow py-8 px-6 space-y-2 overflow-y-auto">
+            <div className="flex-grow py-8 px-6 space-y-2 overflow-y-auto z-50">
               <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest px-4 mb-6">Menu Options</div>
               {TABS.map(tab => (
-                <button key={tab.id} onClick={() => dispatch({ type: 'SET_TAB', payload: tab.id })} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${state.activeTab === tab.id ? 'bg-violet-50 dark:bg-violet-500/10 border-violet-100 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 shadow-sm translate-x-2' : 'bg-transparent border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-800 dark:hover:text-slate-200'}`}>
+                <button key={tab.id} onClick={() => dispatch({ type: 'SET_TAB', payload: tab.id })} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${state.activeTab === tab.id ? 'bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 shadow-sm translate-x-2' : 'bg-transparent border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100'}`}>
                   <div className="flex items-center space-x-4"><tab.icon className="w-5 h-5" /><span>{tab.label}</span></div>
                   {state.activeTab === tab.id && <ChevronRight className="w-4 h-4" />}
                 </button>
               ))}
             </div>
 
-            <div className="p-8 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-8 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 z-50">
                <div className="flex flex-col">
                  <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Created By</div>
                  <div className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">{APP_CONFIG.creator}</div>
@@ -1370,9 +1823,9 @@
           <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/60 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-20 flex items-center justify-between">
               <div className="flex items-center space-x-5">
-                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl hover:shadow-sm transition-all active:scale-95 text-slate-600 dark:text-slate-300"><Menu className="w-5 h-5" /></button>
+                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl hover:shadow-sm transition-all active:scale-95 text-slate-700 dark:text-slate-300"><Menu className="w-5 h-5" /></button>
                 <div className="hidden sm:flex flex-col border-l-2 border-slate-200 dark:border-slate-700 pl-5">
-                  <span className="font-bold tracking-[0.2em] uppercase text-base text-slate-800 dark:text-white leading-none">{APP_CONFIG.name}</span>
+                  <span className="font-bold tracking-[0.2em] uppercase text-base text-slate-900 dark:text-white leading-none">{APP_CONFIG.name}</span>
                   <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mt-2 leading-none tracking-widest">{APP_CONFIG.university}</span>
                 </div>
               </div>
