@@ -22,7 +22,7 @@
       transition: background-color 0.5s ease, color 0.5s ease; 
       -webkit-font-smoothing: antialiased; 
       background-color: #FAFAFA;
-      color: #1E293B; /* High contrast text for light mode */
+      color: #1E293B; 
     }
 
     body.dark { 
@@ -32,7 +32,13 @@
     
     .font-mono { font-family: var(--font-mono) !important; }
 
-    /* Static Gradient Fallbacks behind the Canvas */
+    /* Animated Ambient Backgrounds */
+    @keyframes ambientPan {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .bg-ambient-light { 
       background: 
         radial-gradient(circle at 0% 0%, rgba(238, 242, 255, 1) 0%, transparent 50%),
@@ -40,6 +46,8 @@
         radial-gradient(circle at 100% 100%, rgba(240, 253, 250, 1) 0%, transparent 50%),
         radial-gradient(circle at 0% 100%, rgba(250, 245, 255, 1) 0%, transparent 50%),
         #FFFFFF;
+      background-size: 200% 200%;
+      animation: ambientPan 20s ease-in-out infinite;
     }
     
     .bg-ambient-dark { 
@@ -49,6 +57,8 @@
         radial-gradient(circle at 100% 100%, rgba(15, 118, 110, 0.3) 0%, transparent 50%),
         radial-gradient(circle at 0% 100%, rgba(23, 37, 84, 0.6) 0%, transparent 50%),
         #020617;
+      background-size: 200% 200%;
+      animation: ambientPan 20s ease-in-out infinite;
     }
 
     /* True Matrix Hacker Theme Overrides */
@@ -128,7 +138,6 @@
       Radio: '<circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48 0a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>',
       Globe: '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>',
       ArrowLeft: '<line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>',
-      ExternalLink: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>',
       Sliders: '<line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>',
       Database: '<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>',
       RefreshCw: '<polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>',
@@ -136,13 +145,14 @@
       Calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
       TrendingUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline>',
       BarChart: '<line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line>',
-      Wifi: '<path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line>'
+      Compass: '<circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>'
     };
 
     const SvgIcon = ({ name, className = "", ...props }) => (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: iconData[name] }} {...props} />
     );
 
+    // Exported Icons
     const Activity = (p) => <SvgIcon name="Activity" {...p} />;
     const Calculator = (p) => <SvgIcon name="Calculator" {...p} />;
     const Settings = (p) => <SvgIcon name="Settings" {...p} />;
@@ -178,7 +188,7 @@
     const Calendar = (p) => <SvgIcon name="Calendar" {...p} />;
     const TrendingUp = (p) => <SvgIcon name="TrendingUp" {...p} />;
     const BarChart = (p) => <SvgIcon name="BarChart" {...p} />;
-    const Wifi = (p) => <SvgIcon name="Wifi" {...p} />;
+    const Compass = (p) => <SvgIcon name="Compass" {...p} />;
 
     // ==========================================
     // DYNAMIC CONTEXT-AWARE BACKGROUND ENGINE
@@ -206,25 +216,28 @@
 
         const initElements = () => {
           elements = [];
-          if (activeTab === 'tools') {
-            const num = Math.floor((canvas.width * canvas.height) / 15000); 
+          if (activeTab === 'tools' || activeTab === 'about') {
+            const num = Math.floor((canvas.width * canvas.height) / 18000); 
             for (let i = 0; i < num; i++) {
-              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, radius: Math.random() * 2 + 1 });
+              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, radius: Math.random() * 1.5 + 0.5 });
             }
           } else if (activeTab === 'news') {
-            const columns = Math.floor(canvas.width / 20);
+            const columns = Math.floor(canvas.width / 25);
             for (let i = 0; i < columns; i++) {
-              elements.push({ x: i * 20, y: Math.random() * canvas.height, speed: Math.random() * 2 + 1, length: Math.random() * 20 + 10 });
+              elements.push({ x: i * 25, y: Math.random() * canvas.height, speed: Math.random() * 1.5 + 0.5, length: Math.random() * 15 + 10 });
             }
           } else if (activeTab === 'timetable') {
             for (let i = 0; i < 15; i++) {
-              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, width: Math.random() * 100 + 50, speed: Math.random() * 0.5 + 0.2 });
+              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, width: Math.random() * 120 + 60, speed: Math.random() * 0.3 + 0.1 });
             }
           } else if (activeTab === 'dashboard') {
-            elements.push({ angle: 0 }); // Radar angle
+            // Super smooth floating orbs for home
+            for (let i = 0; i < 6; i++) {
+              elements.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2, radius: Math.random() * 150 + 100 });
+            }
           } else if (activeTab === 'calc') {
-            for (let i = 0; i < 30; i++) {
-              elements.push({ x: Math.random() * canvas.width, y: canvas.height + Math.random() * 500, speed: Math.random() * 1 + 0.5, radius: Math.random() * 20 + 5 });
+            for (let i = 0; i < 20; i++) {
+              elements.push({ x: Math.random() * canvas.width, y: canvas.height + Math.random() * 500, speed: Math.random() * 0.5 + 0.2, radius: Math.random() * 15 + 5 });
             }
           }
         };
@@ -234,12 +247,12 @@
           time += 0.01;
 
           if (activeTab === 'tools' || activeTab === 'about') {
-            // Particle Network
+            // Beautiful Floating Network
             elements.forEach(p => {
               p.x += p.vx; p.y += p.vy;
               if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
               if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-              ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fillStyle = primaryColor + '0.4)'; ctx.fill();
+              ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fillStyle = primaryColor + '0.5)'; ctx.fill();
             });
             for (let i = 0; i < elements.length; i++) {
               for (let j = i + 1; j < elements.length; j++) {
@@ -251,24 +264,23 @@
               }
             }
           } else if (activeTab === 'news') {
-            // Data Rain
-            ctx.fillStyle = primaryColor + '0.5)';
+            // Elegant Data Rain
             ctx.font = '14px monospace';
             elements.forEach(drop => {
               for(let k=0; k<drop.length; k++) {
                 const alpha = 1 - (k/drop.length);
-                ctx.fillStyle = primaryColor + alpha * 0.4 + ')';
+                ctx.fillStyle = primaryColor + alpha * 0.3 + ')';
                 ctx.fillText(Math.random() > 0.5 ? '1' : '0', drop.x, drop.y - (k*20));
               }
               drop.y += drop.speed;
-              if (drop.y - (drop.length*20) > canvas.height) { drop.y = 0; drop.speed = Math.random() * 2 + 1; }
+              if (drop.y - (drop.length*20) > canvas.height) { drop.y = 0; drop.speed = Math.random() * 1.5 + 0.5; }
             });
           } else if (activeTab === 'lab') {
-            // Multi Sine Waves
+            // Flowing Sine Waves
             for (let i = 0; i < 3; i++) {
               ctx.beginPath();
               for (let x = 0; x < canvas.width; x += 10) {
-                const y = canvas.height/2 + Math.sin(x * 0.005 + time + i) * 100 * (i+1)/3;
+                const y = canvas.height/2 + Math.sin(x * 0.003 + time + i) * 150 * (i+1)/3;
                 if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
               }
               ctx.strokeStyle = primaryColor + (0.1 + i*0.05) + ')';
@@ -276,21 +288,25 @@
               ctx.stroke();
             }
           } else if (activeTab === 'dashboard') {
-            // Radar Scanner
-            const cx = canvas.width / 2; const cy = canvas.height / 2; const r = Math.min(cx, cy) - 50;
-            elements[0].angle += 0.02;
-            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.strokeStyle = primaryColor + '0.1)'; ctx.stroke();
-            ctx.beginPath(); ctx.arc(cx, cy, r*0.66, 0, Math.PI * 2); ctx.stroke();
-            ctx.beginPath(); ctx.arc(cx, cy, r*0.33, 0, Math.PI * 2); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(elements[0].angle)*r, cy + Math.sin(elements[0].angle)*r);
-            ctx.strokeStyle = primaryColor + '0.4)'; ctx.lineWidth = 2; ctx.stroke();
+            // Smooth glowing orbs
+            elements.forEach(orb => {
+              orb.x += orb.vx; orb.y += orb.vy;
+              if (orb.x < -orb.radius || orb.x > canvas.width + orb.radius) orb.vx *= -1;
+              if (orb.y < -orb.radius || orb.y > canvas.height + orb.radius) orb.vy *= -1;
+              
+              const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
+              grad.addColorStop(0, primaryColor + '0.1)');
+              grad.addColorStop(1, 'transparent');
+              ctx.beginPath(); ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2); 
+              ctx.fillStyle = grad; ctx.fill();
+            });
           } else if (activeTab === 'timetable') {
             // Horizontal sliding blocks
             elements.forEach(b => {
               b.x += b.speed;
               if (b.x > canvas.width) { b.x = -b.width; b.y = Math.random() * canvas.height; }
-              ctx.fillStyle = primaryColor + '0.05)';
-              ctx.fillRect(b.x, b.y, b.width, 20);
+              ctx.fillStyle = primaryColor + '0.04)';
+              ctx.fillRect(b.x, b.y, b.width, 15);
             });
           } else if (activeTab === 'calc') {
             // Ascending Bubbles
@@ -298,7 +314,7 @@
               b.y -= b.speed;
               if (b.y < -50) { b.y = canvas.height + 50; b.x = Math.random() * canvas.width; }
               ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
-              ctx.strokeStyle = primaryColor + '0.2)'; ctx.stroke();
+              ctx.strokeStyle = primaryColor + '0.15)'; ctx.stroke();
             });
           }
 
@@ -317,7 +333,7 @@
     };
 
     // ==========================================
-    // CONFIGURATION
+    // APP CONFIGURATION
     // ==========================================
     const APP_CONFIG = {
       name: "ECE Tools Hub",
@@ -460,7 +476,7 @@
                 </div>
                 <div className="space-y-4">
                   {Object.keys(schedule).map(day => (
-                    <div key={day} className="flex items-center space-x-4 bg-slate-50/80 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/50 transition-colors">
+                    <div key={day} className="flex items-center space-x-4 bg-slate-50/80 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50 transition-colors">
                       <div className="w-20 font-bold text-sm text-slate-900 dark:text-slate-200 tracking-wider">{day}</div>
                       {schedule[day].map((period, i) => (
                         <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm font-bold outline-none focus:border-violet-500 transition-all text-center text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm" placeholder="Free" />
@@ -485,8 +501,7 @@
       const RSS_FEEDS = [
         'https://www.eetimes.com/feed/',
         'https://hackaday.com/blog/feed/',
-        'https://spectrum.ieee.org/feeds/feed.rss',
-        'https://www.electronicsweekly.com/feed/'
+        'https://spectrum.ieee.org/feeds/feed.rss'
       ];
 
       const fetchFreshNews = async () => {
@@ -509,7 +524,7 @@
             setNews(shuffled); setLastSync(new Date());
           } else { throw new Error("Data parsing error"); }
         } catch (err) {
-           showToast("Unable to fetch live feed. Please try again later.");
+           showToast("Unable to fetch live feed. Offline mode active.");
            if (news.length === 0) setNews(FALLBACK_NEWS);
         } finally { setLoading(false); }
       };
@@ -655,9 +670,9 @@
       );
     };
 
-    // --- ENGINEERING TOOLS (14 Tools including 4 New Ones) ---
+    // --- ENGINEERING TOOLS ---
     const ToolsView = () => {
-      const [activeTool, setActiveTool] = useState('bjt'); // Start with new tool
+      const [activeTool, setActiveTool] = useState('bjt'); 
 
       // Existing Tools State
       const [bands, setBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[2]]); 
@@ -705,9 +720,9 @@
       const t5Duty = useMemo(() => { if(t5R1===0 && t5R2===0) return 0; return ((t5R1 + t5R2) / (t5R1 + 2*t5R2)) * 100; }, [t5R1, t5R2]);
 
       // BJT Calculations
-      const bjtIb = (bjtVcc - 0.7) / (bjtRb * 1000); // Amps
-      const bjtIc = Math.min(bjtBeta * bjtIb, bjtVcc / (bjtRc * 1000)); // Amps (clamped by saturation)
-      const bjtVce = Math.max(0, bjtVcc - (bjtIc * (bjtRc * 1000))); // Volts
+      const bjtIb = (bjtVcc - 0.7) / (bjtRb * 1000); 
+      const bjtIc = Math.min(bjtBeta * bjtIb, bjtVcc / (bjtRc * 1000)); 
+      const bjtVce = Math.max(0, bjtVcc - (bjtIc * (bjtRc * 1000))); 
 
       // Phasor Calculations
       const xl = 2 * Math.PI * rlcF * (rlcL/1000);
@@ -716,7 +731,7 @@
 
       const TOOL_TABS = [
         { id: 'bjt', label: 'BJT Load Line', icon: TrendingUp },
-        { id: 'phasor', label: 'RLC Phasor', icon: Compass }, // Will fallback to Circle
+        { id: 'phasor', label: 'RLC Phasor', icon: Globe }, 
         { id: 'linecode', label: 'Digital Coding', icon: BarChart },
         { id: 'resistor', label: 'Resistor Code', icon: Layers },
         { id: 'inductor', label: 'Inductor Code', icon: Layers },
@@ -751,7 +766,6 @@
 
           <div className="mt-8">
             
-            {/* NEW: BJT Load Line */}
             {activeTool === 'bjt' && (
               <Widget title="BJT DC Load Line & Q-Point" icon={TrendingUp}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
@@ -764,21 +778,16 @@
                     <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700 shadow-inner relative overflow-hidden">
                       <div className="absolute top-4 left-4 text-xs font-bold text-slate-400">Load Line Graph</div>
                       <svg viewBox="-10 -10 120 120" className="w-full h-full overflow-visible mt-4">
-                        {/* Axes */}
                         <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
                         <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
                         <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 font-bold">Vce (V)</text>
                         <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 font-bold">Ic (mA)</text>
                         
-                        {/* Load Line */}
                         {bjtVcc > 0 && bjtRc > 0 && (
-                          <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="2 2" className="opacity-70" /> // Simplified visual scale
+                          <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="2 2" className="opacity-70" /> 
                         )}
-                        
-                        {/* Scaled Load Line (0 to Vcc on X, 0 to Vcc/Rc on Y) */}
                         <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" />
                         
-                        {/* Q-Point */}
                         <circle cx={(bjtVce/bjtVcc)*100 || 0} cy={100 - ((bjtIc*1000)/(bjtVcc/bjtRc))*100 || 0} r="4" fill="#10B981" className="shadow-xl" />
                         
                         <text x="50" y="-15" fill="currentColor" fontSize="6" textAnchor="middle" className="font-mono text-emerald-500 font-bold">
@@ -790,7 +799,6 @@
               </Widget>
             )}
 
-            {/* NEW: RLC Phasor Diagram */}
             {activeTool === 'phasor' && (
               <Widget title="RLC Phasor Diagram" icon={Globe}>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
@@ -802,11 +810,9 @@
                     </div>
                     <div className="bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-800 shadow-xl overflow-hidden relative">
                       <svg viewBox="-100 -100 200 200" className="w-full h-full overflow-visible">
-                        {/* Axes */}
                         <line x1="-100" y1="0" x2="100" y2="0" stroke="#334155" strokeWidth="1" strokeDasharray="4 4"/>
                         <line x1="0" y1="-100" x2="0" y2="100" stroke="#334155" strokeWidth="1" strokeDasharray="4 4"/>
                         
-                        {/* Scale vectors relative to max */}
                         {(() => {
                           const max = Math.max(rlcR, xl, xc) || 1;
                           const sR = (rlcR / max) * 80;
@@ -814,16 +820,15 @@
                           const sXC = (xc / max) * 80;
                           return (
                             <g>
-                              {/* R (Right) */}
-                              <line x1="0" y1="0" x2={sR} y2="0" stroke="#10B981" strokeWidth="4" markerEnd="url(#arrow)"/>
+                              <line x1="0" y1="0" x2={sR} y2="0" stroke="#10B981" strokeWidth="4" />
                               <text x={sR + 10} y="5" fill="#10B981" fontSize="12" fontWeight="bold">R</text>
-                              {/* XL (Up - negative Y) */}
+                              
                               <line x1="0" y1="0" x2="0" y2={-sXL} stroke="#3B82F6" strokeWidth="4" />
                               <text x="-20" y={-sXL - 5} fill="#3B82F6" fontSize="12" fontWeight="bold">XL</text>
-                              {/* XC (Down - positive Y) */}
+                              
                               <line x1="0" y1="0" x2="0" y2={sXC} stroke="#EC4899" strokeWidth="4" />
                               <text x="-20" y={sXC + 15} fill="#EC4899" fontSize="12" fontWeight="bold">XC</text>
-                              {/* Z (Resultant) */}
+                              
                               <line x1="0" y1="0" x2={sR} y2={sXC - sXL} stroke="#F59E0B" strokeWidth="2" strokeDasharray="2 2" />
                               <circle cx={sR} cy={sXC - sXL} r="4" fill="#F59E0B" />
                             </g>
@@ -836,7 +841,6 @@
               </Widget>
             )}
 
-            {/* NEW: Digital Line Coding */}
             {activeTool === 'linecode' && (
               <Widget title="Digital Line Coding" icon={BarChart}>
                  <div className="grid grid-cols-1 gap-8 py-4">
@@ -846,7 +850,6 @@
                     </div>
                     
                     <div className="space-y-6">
-                      {/* NRZ-L */}
                       <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">NRZ-L (Non-Return-to-Zero Level)</div>
                         <svg viewBox={`0 0 ${lineCode.length * 40 || 40} 40`} className="w-full h-16 overflow-visible">
@@ -854,8 +857,6 @@
                           {lineCode.split('').map((b,i) => <text key={i} x={i*40 + 20} y="-10" fill="currentColor" fontSize="10" className="text-slate-400" textAnchor="middle">{b}</text>)}
                         </svg>
                       </div>
-
-                      {/* Manchester */}
                       <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Manchester (IEEE 802.3)</div>
                         <svg viewBox={`0 0 ${lineCode.length * 40 || 40} 40`} className="w-full h-16 overflow-visible">
@@ -871,7 +872,6 @@
               </Widget>
             )}
 
-            {/* Existing Tools Follow... */}
             {activeTool === 'resistor' && (
               <Widget title="4-Band Resistor Decoder" icon={Layers}>
                  <div className="flex flex-col items-center py-4">
