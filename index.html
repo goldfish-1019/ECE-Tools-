@@ -1,299 +1,263 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, Settings, Moon, Sun, GraduationCap, X, AlertCircle, Info, BookOpen } from 'lucide-react';
-
-// --- Toast Notification Component ---
-const Toast = ({ message, type, onClose }) => {
-  const isError = type === 'error';
-  return (
-    <div className={`flex items-start p-4 mb-3 bg-white dark:bg-slate-800 rounded shadow-lg border-l-4 ${isError ? 'border-red-500' : 'border-blue-500'} transition-all transform duration-300 ease-in-out w-full max-w-md`}>
-      <div className={`mt-0.5 ${isError ? 'text-red-500' : 'text-blue-500'}`}>
-        {isError ? <AlertCircle size={18} /> : <Info size={18} />}
-      </div>
-      <div className="flex-1 ml-3 text-sm text-gray-800 dark:text-gray-100 font-medium">
-        {message}
-      </div>
-      <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-        <X size={16} />
-      </button>
-    </div>
-  );
-};
-
-export default function App() {
-  // --- State Management ---
-  const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Hello! I am your KTU Study Assistant. How can I help you with your syllabus today?' }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [theme, setTheme] = useState('ktu'); // 'light', 'dark', 'ktu'
-  const [toasts, setToasts] = useState([]);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(''); // User provided key for GitHub hosting
-  
-  const messagesEndRef = useRef(null);
-
-  // --- Theme Handling ---
-  useEffect(() => {
-    document.documentElement.classList.remove('dark', 'ktu-theme');
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else if (theme === 'ktu') {
-      // We will handle KTU theme via custom classes, but it can also trigger standard dark/light shifts
-      document.documentElement.classList.add('ktu-theme');
-    }
-  }, [theme]);
-
-  const toggleTheme = (newTheme) => {
-    setTheme(newTheme);
-    addToast(`Switched to ${newTheme} theme`, 'info');
-  };
-
-  // --- Toast Management ---
-  const addToast = (message, type = 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 5000);
-  };
-
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
-
-  // Auto-scroll to bottom of chat
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // --- API Call Logic (with Exponential Backoff) ---
-  const fetchWithRetry = async (url, options, retries = 5) => {
-    const delays = [1000, 2000, 4000, 8000, 16000];
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-      } catch (error) {
-        if (i === retries - 1) throw error;
-        await new Promise(res => setTimeout(res, delays[i]));
-      }
-    }
-  };
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMessage = input.trim();
-    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
-    setInput('');
-    setIsLoading(true);
-
-    try {
-      // When hosted on GitHub, users must enter their own key in settings. 
-      // In this specific canvas environment, an empty string falls back to the system's key.
-      const activeApiKey = apiKey || ""; 
-      
-      // CRITICAL FIX: Using the correct model name supported by the v1beta environment API
-      const model = 'gemini-2.5-flash-preview-09-2025';
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeApiKey}`;
-
-      const systemInstruction = "You are an expert academic tutor for students in the Kerala Technological University (KTU) in India. Always explain concepts clearly, syncing equations and terms to the KTU syllabus. Use proper engineering conventions, maintain an encouraging tone, and format mathematical formulas clearly.";
-
-      const payload = {
-        contents: [{ parts: [{ text: userMessage }] }],
-        systemInstruction: { parts: [{ text: systemInstruction }] }
-      };
-
-      const result = await fetchWithRetry(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const assistantMessage = result.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't generate a response. Please try again.";
-      setMessages(prev => [...prev, { role: 'assistant', text: assistantMessage }]);
-
-    } catch (error) {
-      console.error("API Error:", error);
-      addToast(`API Error: ${error.message}. If you are on GitHub, please ensure you have entered a valid API Key in the settings.`, 'error');
-      setMessages(prev => [...prev, { role: 'assistant', text: '*Error generating response. Please check the notifications.*' }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // --- Theme Styles ---
-  const getThemeClasses = () => {
-    switch (theme) {
-      case 'dark':
-        return 'bg-slate-900 text-slate-100';
-      case 'ktu':
-        return 'bg-gradient-to-br from-blue-50 to-indigo-100 text-slate-800'; // KTU themed light colors
-      default:
-        return 'bg-gray-50 text-gray-900'; // Light
-    }
-  };
-
-  const getChatContainerClasses = () => {
-    switch (theme) {
-      case 'dark':
-        return 'bg-slate-800 border-slate-700';
-      case 'ktu':
-        return 'bg-white border-blue-200 shadow-blue-100';
-      default:
-        return 'bg-white border-gray-200';
-    }
-  };
-
-  return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${getThemeClasses()}`}>
-      
-      {/* --- Toasts Container --- */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col items-end space-y-2 pointer-events-none">
-        {toasts.map(toast => (
-          <div key={toast.id} className="pointer-events-auto w-full max-w-sm">
-            <Toast 
-              message={toast.message} 
-              type={toast.type} 
-              onClose={() => removeToast(toast.id)} 
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* --- Header --- */}
-      <header className={`p-4 shadow-sm border-b flex justify-between items-center transition-colors ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : theme === 'ktu' ? 'bg-indigo-900 text-white border-indigo-800' : 'bg-white border-gray-200'}`}>
-        <div className="flex items-center gap-2">
-          <BookOpen className={theme === 'ktu' ? 'text-yellow-400' : 'text-blue-500'} size={24} />
-          <h1 className="text-xl font-bold tracking-tight">KTU Study Assistant</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* Theme Switchers */}
-          <button onClick={() => toggleTheme('light')} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="Light Theme">
-            <Sun size={18} />
-          </button>
-          <button onClick={() => toggleTheme('dark')} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="Dark Theme">
-            <Moon size={18} />
-          </button>
-          <button onClick={() => toggleTheme('ktu')} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="KTU Theme">
-            <GraduationCap size={18} />
-          </button>
-          <div className="w-px h-6 bg-current opacity-20 mx-1"></div>
-          {/* Settings Toggle */}
-          <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-black/20' : 'hover:bg-black/10'}`} title="Settings">
-            <Settings size={18} />
-          </button>
-        </div>
-      </header>
-
-      {/* --- Main Chat Area --- */}
-      <main className="flex-1 flex overflow-hidden">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTU Study Assistant</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        {/* Chat Messages */}
-        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full relative">
-          
-          {/* Settings Panel (Overlay) */}
-          {showSettings && (
-            <div className={`absolute top-0 right-0 z-10 m-4 p-4 rounded-lg shadow-xl border w-80 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'}`}>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Settings size={16} /> Configuration
-                </h3>
-                <button onClick={() => setShowSettings(false)}><X size={16} /></button>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1 opacity-80">Gemini API Key (For GitHub Hosting)</label>
-                  <input 
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Enter your API Key..."
-                    className={`w-full px-3 py-2 rounded border text-sm ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-300'}`}
-                  />
-                  <p className="text-[10px] mt-1 opacity-70">
-                    Leave blank if testing in the original preview environment. Required for standalone use.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+        /* Typing animation */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
-                  msg.role === 'user' 
-                    ? (theme === 'ktu' ? 'bg-indigo-600 text-white' : theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
-                    : getChatContainerClasses()
-                }`}>
-                  <div className="text-xs font-semibold mb-1 opacity-75">
-                    {msg.role === 'user' ? 'You' : 'KTU Assistant'}
-                  </div>
-                  {/* Basic text rendering. Note: For complex equations, a markdown parser like react-markdown + remark-math would be ideal */}
-                  <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                    {msg.text}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm flex items-center space-x-2 ${getChatContainerClasses()}`}>
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
+        /* Basic Markdown Styles */
+        .markdown-body p { margin-bottom: 0.5rem; }
+        .markdown-body strong { font-weight: 700; color: #1e3a8a; }
+        .markdown-body em { font-style: italic; }
+        .markdown-body pre { background: #f1f5f9; padding: 0.5rem; border-radius: 0.25rem; overflow-x: auto; margin-bottom: 0.5rem; font-family: monospace; font-size: 0.875rem; }
+        .markdown-body code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem; color: #b91c1c; }
+        .markdown-body ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.5rem; }
+        .markdown-body ol { list-style-type: decimal; margin-left: 1.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen flex flex-col font-sans text-gray-800">
 
-          {/* Input Area */}
-          <div className={`p-4 border-t ${theme === 'dark' ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-transparent'}`}>
-            <div className={`flex items-end gap-2 p-2 rounded-xl border shadow-sm transition-colors ${getChatContainerClasses()}`}>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask a question about the KTU syllabus..."
-                className="flex-1 max-h-32 bg-transparent outline-none resize-none px-2 py-1 text-sm text-current"
-                rows="1"
-                style={{ minHeight: '40px' }}
-              />
-              <button 
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-                className={`p-2.5 rounded-lg flex-shrink-0 transition-all ${
-                  !input.trim() || isLoading 
-                    ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-slate-700' 
-                    : (theme === 'ktu' ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md')
-                }`}
-              >
-                <Send size={18} />
-              </button>
+    <!-- Header -->
+    <header class="bg-indigo-900 text-white p-4 shadow-md flex justify-between items-center shrink-0 z-10">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-book-open text-yellow-400 text-2xl"></i>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide">KTU Study Assistant</h1>
+                <p class="text-xs text-indigo-200">Kerala Technological University</p>
             </div>
-            <div className="text-center mt-2">
-              <span className="text-[10px] opacity-50">Press Enter to send, Shift+Enter for new line.</span>
-            </div>
-          </div>
-
         </div>
-      </main>
+    </header>
+
+    <!-- Chat Container -->
+    <main class="flex-1 overflow-y-auto p-4 w-full max-w-4xl mx-auto flex flex-col gap-4" id="chat-container">
+        <!-- Initial Welcome Message -->
+        <div class="flex justify-start">
+            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-sm p-4 shadow-sm max-w-[90%] sm:max-w-[80%]">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fa-solid fa-robot text-indigo-600"></i>
+                    <span class="text-xs font-bold text-indigo-600">KTU Assistant</span>
+                </div>
+                <div class="text-sm leading-relaxed text-gray-700">
+                    Hello! I am your AI Study Assistant optimized for the <strong>KTU Syllabus</strong>. You can ask me to:
+                    <ul class="mt-2 list-disc ml-4">
+                        <li>Explain engineering concepts (ECE, CSE, Mech, etc.)</li>
+                        <li>Derive mathematical equations</li>
+                        <li>Help with previous year question concepts</li>
+                    </ul>
+                    How can I help you today?
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Indicator (Hidden initially) -->
+    <div id="loading-indicator" class="hidden w-full max-w-4xl mx-auto p-4 justify-start">
+        <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-sm p-4 shadow-sm flex gap-1 items-center h-10">
+            <div class="w-2 h-2 bg-indigo-500 rounded-full typing-dot"></div>
+            <div class="w-2 h-2 bg-indigo-500 rounded-full typing-dot"></div>
+            <div class="w-2 h-2 bg-indigo-500 rounded-full typing-dot"></div>
+        </div>
     </div>
-  );
-}
+
+    <!-- Input Area -->
+    <footer class="bg-white border-t border-gray-200 p-3 sm:p-4 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="max-w-4xl mx-auto flex flex-col gap-2">
+            <div id="error-msg" class="text-red-500 text-xs font-semibold text-center hidden bg-red-50 p-2 rounded"></div>
+            
+            <div class="relative flex items-end gap-2">
+                <textarea 
+                    id="user-input" 
+                    rows="1" 
+                    class="w-full bg-gray-100 border border-gray-300 rounded-xl pl-4 pr-12 py-3 outline-none resize-none max-h-32 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm"
+                    placeholder="Ask about your KTU subjects here..."
+                    oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 128) + 'px'"
+                ></textarea>
+                <button 
+                    id="send-btn" 
+                    class="absolute right-2 bottom-1.5 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center w-10 h-10"
+                    onclick="sendMessage()"
+                >
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="text-center">
+                <span class="text-[10px] text-gray-400">Press Enter to send, Shift+Enter for new line</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // =========================================================================
+        // 🛑 STEP 1: PASTE YOUR GOOGLE GEMINI API KEY BELOW 🛑
+        // Replace the empty quotes with your actual API key.
+        // Example: const API_KEY = "AIzaSyC-xxxxxxxxxxxxxxxxx";
+        // =========================================================================
+        const API_KEY = ""; 
+        
+        // Using the standard model available to all personal API keys
+        const MODEL_NAME = "gemini-1.5-flash"; 
+
+        // DOM Elements
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMsg = document.getElementById('error-msg');
+
+        // Store conversation history for context
+        let conversationHistory = [];
+
+        // Handle Enter key (Shift+Enter for new line)
+        userInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Simple Markdown parser
+        function parseMarkdown(text) {
+            let html = text
+                // Code blocks
+                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                // Inline code
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                // Bold
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                // Italics
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                // Lists (basic support)
+                .replace(/^\s*\*\s+(.*)/gm, '<ul><li>$1</li></ul>')
+                // Newlines to breaks (if not inside pre/code blocks, simplified here)
+                .replace(/\n/g, '<br>');
+            
+            // Clean up consecutive uls
+            html = html.replace(/<\/ul><br><ul>/g, '');
+            return html;
+        }
+
+        function appendMessage(role, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            if (role === 'user') {
+                bubble.className = "bg-indigo-600 text-white rounded-2xl rounded-tr-sm p-3 sm:p-4 shadow-md max-w-[90%] sm:max-w-[80%]";
+                bubble.innerHTML = `
+                    <div class="text-xs font-semibold text-indigo-200 mb-1">You</div>
+                    <div class="text-sm leading-relaxed whitespace-pre-wrap">${text}</div>
+                `;
+            } else {
+                bubble.className = "bg-white border border-gray-200 rounded-2xl rounded-tl-sm p-3 sm:p-4 shadow-sm max-w-[90%] sm:max-w-[80%] markdown-body";
+                bubble.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-robot text-indigo-600"></i>
+                        <span class="text-xs font-bold text-indigo-600">KTU Assistant</span>
+                    </div>
+                    <div class="text-sm leading-relaxed text-gray-800">${parseMarkdown(text)}</div>
+                `;
+            }
+            
+            wrapper.appendChild(bubble);
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Strict API Key Check
+            if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE" || API_KEY.trim() === "") {
+                errorMsg.innerHTML = '⚠️ <b>Missing API Key:</b> You must edit the <code>index.html</code> file on GitHub and paste your API key into line 98.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            // Reset UI
+            errorMsg.classList.add('hidden');
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            
+            appendMessage('user', text);
+            loadingIndicator.classList.remove('hidden');
+            loadingIndicator.classList.add('flex');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Add to history
+            conversationHistory.push({ role: "user", parts: [{ text: text }] });
+
+            const systemInstruction = "You are an expert academic tutor for engineering students at the Kerala Technological University (KTU). Always explain concepts clearly, syncing equations and terms to the KTU syllabus. Use proper engineering conventions, maintain an encouraging tone, and format output using markdown.";
+
+            const payload = {
+                contents: conversationHistory,
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (aiResponse) {
+                    appendMessage('model', aiResponse);
+                    // Add AI response to history to maintain context
+                    conversationHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                } else {
+                    throw new Error("No response generated by AI.");
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                // Remove the last user message from history if the API failed, so they can try again
+                conversationHistory.pop();
+                
+                errorMsg.innerHTML = `⚠️ <b>Connection Error:</b> ${error.message}`;
+                errorMsg.classList.remove('hidden');
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                loadingIndicator.classList.remove('flex');
+                userInput.disabled = false;
+                sendBtn.disabled = false;
+                userInput.focus();
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
+
 
