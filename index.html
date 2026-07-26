@@ -1,1890 +1,299 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ECE Tooling Hub - KTU Companion</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone@7.23.6/babel.min.js"></script>
+import React, { useState, useEffect, useRef } from 'react';
+import { Send, Settings, Moon, Sun, GraduationCap, X, AlertCircle, Info, BookOpen } from 'lucide-react';
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@100;400;700&display=swap');
-
-    :root { --font-sans: 'Outfit', sans-serif; --font-mono: 'JetBrains Mono', monospace; }
-    
-    body { 
-      font-family: var(--font-sans); 
-      overflow-x: hidden; 
-      transition: background-color 0.5s ease, color 0.5s ease; 
-      -webkit-font-smoothing: antialiased; 
-      background-color: #FAFAFA;
-      color: #0F172A; /* Much darker base text for light mode */
-    }
-
-    body.dark { 
-      background-color: #0B0F19; 
-      color: #F8FAFC; 
-    }
-    
-    .font-mono { font-family: var(--font-mono) !important; }
-
-    /* Animated Ambient Backgrounds */
-    @keyframes ambientPan {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    .bg-ambient-light { 
-      background: 
-        radial-gradient(circle at 0% 0%, rgba(238, 242, 255, 1) 0%, transparent 50%),
-        radial-gradient(circle at 100% 0%, rgba(255, 241, 242, 1) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(240, 253, 250, 1) 0%, transparent 50%),
-        radial-gradient(circle at 0% 100%, rgba(250, 245, 255, 1) 0%, transparent 50%),
-        #F8FAFC;
-    }
-    
-    .bg-ambient-dark { 
-      background: 
-        radial-gradient(circle at 0% 0%, rgba(30, 27, 75, 1) 0%, transparent 50%),
-        radial-gradient(circle at 100% 0%, rgba(76, 29, 149, 0.4) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(15, 118, 110, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 0% 100%, rgba(23, 37, 84, 0.6) 0%, transparent 50%),
-        #020617;
-      background-size: 200% 200%;
-      animation: ambientPan 25s ease-in-out infinite;
-    }
-
-    /* Mesmerizing Colourful Theme */
-    .bg-ambient-colourful {
-      background: 
-        radial-gradient(circle at 15% 50%, rgba(236, 72, 153, 0.5) 0%, transparent 50%),
-        radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.5) 0%, transparent 50%),
-        radial-gradient(circle at 50% 85%, rgba(234, 179, 8, 0.4) 0%, transparent 50%),
-        radial-gradient(circle at 80% 90%, rgba(139, 92, 246, 0.5) 0%, transparent 50%),
-        #fdf2f8;
-      background-size: 150% 150%;
-      animation: ambientPan 15s ease-in-out infinite alternate;
-      color: #0F172A;
-    }
-    body.colourful * { border-color: rgba(255,255,255,0.4) !important; }
-    body.colourful .bg-white\/95, body.colourful .bg-white\/90 { 
-      background-color: rgba(255, 255, 255, 0.5) !important; 
-      backdrop-filter: blur(32px) !important;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1) !important;
-    }
-    body.colourful .bg-slate-50, body.colourful .bg-slate-100 { background-color: rgba(255, 255, 255, 0.3) !important; }
-    body.colourful .text-slate-500, body.colourful .text-slate-600 { color: #334155 !important; }
-    body.colourful .text-slate-700, body.colourful .text-slate-800, body.colourful .text-slate-900 { color: #0F172A !important; font-weight: 600; }
-
-    /* True Matrix Hacker Theme Overrides */
-    body.matrix {
-      background-color: #050505 !important;
-      background-image: 
-        linear-gradient(rgba(34, 197, 94, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34, 197, 94, 0.08) 1px, transparent 1px) !important;
-      background-size: 30px 30px !important;
-      color: #4ade80 !important;
-    }
-    body.matrix * { border-color: rgba(34, 197, 94, 0.4) !important; }
-    body.matrix .bg-white\/95, body.matrix .bg-white\/90, body.matrix .bg-white\/80, body.matrix .bg-slate-50, body.matrix .bg-slate-100 { 
-      background-color: rgba(5, 5, 5, 0.95) !important; color: #4ade80 !important; backdrop-filter: none !important; box-shadow: none !important;
-    }
-    body.matrix .text-slate-800, body.matrix .text-slate-900, body.matrix .text-slate-700, body.matrix .text-slate-600, body.matrix .text-slate-500, body.matrix .text-violet-600, body.matrix .text-violet-500 { color: #4ade80 !important; }
-    body.matrix .bg-violet-500, body.matrix .bg-violet-600 { background-color: #14532d !important; color: #4ade80 !important; }
-    body.matrix .bg-violet-50, body.matrix .bg-violet-100 { background-color: rgba(20, 83, 45, 0.3) !important; }
-    body.matrix input, body.matrix select { background-color: #000 !important; color: #4ade80 !important; }
-
-    /* Scrollbars & Controls */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
-    
-    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-    input[type=range]:focus { outline: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 22px; width: 22px; border: 4px solid white; border-radius: 50%; background: currentColor; cursor: pointer; margin-top: -9px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    .dark input[type=range]::-webkit-slider-thumb, .matrix input[type=range]::-webkit-slider-thumb { border-color: #1E293B; }
-    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(148, 163, 184, 0.4); border-radius: 4px; }
-
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    .animate-blink { animation: blink 2s ease-in-out infinite; }
-
-    .news-content p { margin-bottom: 1.2rem; line-height: 1.8; color: inherit; }
-    .news-content img { max-width: 100%; height: auto; border-radius: 16px; margin: 1.5rem 0; max-height: 400px; object-fit: cover; }
-    .news-content a { text-decoration: none; color: #8B5CF6; font-weight: 600; transition: color 0.2s; }
-  </style>
-</head>
-<body class="bg-ambient-light">
-  <div id="root"></div>
-
-  <script type="text/babel" data-presets="react">
-    const { useState, useEffect, useReducer, useRef, useMemo } = React;
-    
-    // ==========================================
-    // DEPENDENCY-FREE SVG ICON ENGINE
-    // ==========================================
-    const iconData = {
-      Activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>',
-      Calculator: '<rect x="4" y="2" width="16" height="20" rx="2" /><line x1="8" y1="6" x2="16" y2="6" /><line x1="16" y1="14" x2="16" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" />',
-      Settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" />',
-      Play: '<polygon points="5 3 19 12 5 21 5 3"></polygon>',
-      Pause: '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>',
-      RotateCcw: '<polyline points="3 2 3 12 12 12"></polyline><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"></path>',
-      Zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
-      Cpu: '<rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line>',
-      Hash: '<line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line>',
-      Layers: '<polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline>',
-      Sun: '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="M5 5l1.5 1.5"></path><path d="M17.5 17.5L19 19"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="M5 19l1.5-1.5"></path><path d="M17.5 6.5L19 5"></path>',
-      Moon: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>',
-      Terminal: '<polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line>',
-      GraduationCap: '<path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path>',
-      Clock: '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>',
-      Monitor: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>',
-      User: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
-      Menu: '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>',
-      X: '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
-      CheckCircle: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
-      Circle: '<circle cx="12" cy="12" r="10"></circle>',
-      ListTodo: '<rect x="3" y="5" width="6" height="6" rx="1"></rect><path d="m3 17 2 2 4-4"></path><path d="M13 6h8"></path><path d="M13 12h8"></path><path d="M13 18h8"></path>',
-      Code: '<polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline>',
-      ChevronRight: '<polyline points="9 18 15 12 9 6"></polyline>',
-      GitBranch: '<line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path>',
-      Radio: '<circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48 0a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>',
-      Globe: '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>',
-      ArrowLeft: '<line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>',
-      Sliders: '<line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>',
-      Database: '<ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>',
-      RefreshCw: '<polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>',
-      Mail: '<rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>',
-      Calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
-      TrendingUp: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline>',
-      BarChart: '<line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line>',
-      Compass: '<circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>',
-      Palette: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>'
-    };
-
-    const SvgIcon = ({ name, className = "", ...props }) => (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} dangerouslySetInnerHTML={{ __html: iconData[name] }} {...props} />
-    );
-
-    // Exported Icons
-    const Activity = (p) => <SvgIcon name="Activity" {...p} />;
-    const Calculator = (p) => <SvgIcon name="Calculator" {...p} />;
-    const Settings = (p) => <SvgIcon name="Settings" {...p} />;
-    const Play = (p) => <SvgIcon name="Play" {...p} />;
-    const Pause = (p) => <SvgIcon name="Pause" {...p} />;
-    const RotateCcw = (p) => <SvgIcon name="RotateCcw" {...p} />;
-    const Zap = (p) => <SvgIcon name="Zap" {...p} />;
-    const Cpu = (p) => <SvgIcon name="Cpu" {...p} />;
-    const Hash = (p) => <SvgIcon name="Hash" {...p} />;
-    const Layers = (p) => <SvgIcon name="Layers" {...p} />;
-    const Sun = (p) => <SvgIcon name="Sun" {...p} />;
-    const Moon = (p) => <SvgIcon name="Moon" {...p} />;
-    const Terminal = (p) => <SvgIcon name="Terminal" {...p} />;
-    const GraduationCap = (p) => <SvgIcon name="GraduationCap" {...p} />;
-    const Clock = (p) => <SvgIcon name="Clock" {...p} />;
-    const Monitor = (p) => <SvgIcon name="Monitor" {...p} />;
-    const User = (p) => <SvgIcon name="User" {...p} />;
-    const Menu = (p) => <SvgIcon name="Menu" {...p} />;
-    const X = (p) => <SvgIcon name="X" {...p} />;
-    const CheckCircle = (p) => <SvgIcon name="CheckCircle" {...p} />;
-    const Circle = (p) => <SvgIcon name="Circle" {...p} />;
-    const ListTodo = (p) => <SvgIcon name="ListTodo" {...p} />;
-    const Code = (p) => <SvgIcon name="Code" {...p} />;
-    const ChevronRight = (p) => <SvgIcon name="ChevronRight" {...p} />;
-    const GitBranch = (p) => <SvgIcon name="GitBranch" {...p} />;
-    const Radio = (p) => <SvgIcon name="Radio" {...p} />;
-    const Globe = (p) => <SvgIcon name="Globe" {...p} />;
-    const ArrowLeft = (p) => <SvgIcon name="ArrowLeft" {...p} />;
-    const Sliders = (p) => <SvgIcon name="Sliders" {...p} />;
-    const Database = (p) => <SvgIcon name="Database" {...p} />;
-    const RefreshCw = (p) => <SvgIcon name="RefreshCw" {...p} />;
-    const Mail = (p) => <SvgIcon name="Mail" {...p} />;
-    const Calendar = (p) => <SvgIcon name="Calendar" {...p} />;
-    const TrendingUp = (p) => <SvgIcon name="TrendingUp" {...p} />;
-    const BarChart = (p) => <SvgIcon name="BarChart" {...p} />;
-    const Compass = (p) => <SvgIcon name="Compass" {...p} />;
-    const Palette = (p) => <SvgIcon name="Palette" {...p} />;
-
-    // ==========================================
-    // OPTIMIZED DYNAMIC BACKGROUND ENGINE
-    // ==========================================
-    const ContextAmbientEngine = ({ theme, enabled, activeTab }) => {
-      const canvasRef = useRef(null);
-
-      useEffect(() => {
-        if (!enabled || theme === 'matrix') return;
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        let animationFrameId;
-        let elements = [];
-        let time = 0;
-        
-        const resize = () => {
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
-          initElements();
-        };
-
-        const isDark = theme === 'dark';
-        const isColor = theme === 'colourful';
-        // Use soft white orbs for colorful theme, otherwise purple/indigo
-        const baseColor = isColor ? '255, 255, 255' : (isDark ? '139, 92, 246' : '99, 102, 241');
-        
-        const initElements = () => {
-          elements = [];
-          const w = canvas.width; const h = canvas.height;
-          if (activeTab === 'tools' || activeTab === 'about') {
-            // Capped at 35 particles to eliminate lag entirely
-            const num = Math.min(35, Math.floor((w * h) / 25000)); 
-            for (let i = 0; i < num; i++) {
-              elements.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.15, vy: (Math.random() - 0.5) * 0.15, radius: Math.random() * 1.5 + 1 });
-            }
-          } else if (activeTab === 'news') {
-            const columns = Math.floor(w / 35); // wider spacing
-            for (let i = 0; i < columns; i++) {
-              elements.push({ x: i * 35, y: Math.random() * h, speed: Math.random() * 1 + 0.5, length: Math.random() * 10 + 5 });
-            }
-          } else if (activeTab === 'timetable') {
-            for (let i = 0; i < 10; i++) {
-              elements.push({ x: Math.random() * w, y: Math.random() * h, width: Math.random() * 120 + 60, speed: Math.random() * 0.2 + 0.1 });
-            }
-          } else if (activeTab === 'dashboard') {
-            for (let i = 0; i < 4; i++) {
-              elements.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.1, vy: (Math.random() - 0.5) * 0.1, radius: Math.random() * 100 + 80 });
-            }
-          } else if (activeTab === 'calc') {
-            for (let i = 0; i < 15; i++) {
-              elements.push({ x: Math.random() * w, y: h + Math.random() * 500, speed: Math.random() * 0.4 + 0.2, radius: Math.random() * 10 + 5 });
-            }
-          }
-        };
-
-        const draw = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          time += 0.01;
-
-          if (activeTab === 'tools' || activeTab === 'about') {
-            ctx.fillStyle = `rgba(${baseColor}, 0.5)`;
-            elements.forEach(p => {
-              p.x += p.vx; p.y += p.vy;
-              if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-              if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-              ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
-            });
-            // Optimized O(n^2) connection line loop
-            ctx.lineWidth = 1;
-            for (let i = 0; i < elements.length; i++) {
-              for (let j = i + 1; j < elements.length; j++) {
-                const dx = elements[i].x - elements[j].x;
-                const dy = elements[i].y - elements[j].y;
-                const distSq = dx*dx + dy*dy;
-                if (distSq < 22500) { // 150*150
-                  const dist = Math.sqrt(distSq);
-                  ctx.globalAlpha = 0.15 * (1 - dist / 150);
-                  ctx.strokeStyle = `rgb(${baseColor})`;
-                  ctx.beginPath(); ctx.moveTo(elements[i].x, elements[i].y); ctx.lineTo(elements[j].x, elements[j].y); ctx.stroke();
-                }
-              }
-            }
-            ctx.globalAlpha = 1.0;
-          } else if (activeTab === 'news') {
-            ctx.font = '14px monospace';
-            elements.forEach(drop => {
-              for(let k=0; k<drop.length; k++) {
-                ctx.globalAlpha = (1 - (k/drop.length)) * 0.3;
-                ctx.fillStyle = `rgb(${baseColor})`;
-                ctx.fillText(Math.random() > 0.5 ? '1' : '0', drop.x, drop.y - (k*20));
-              }
-              drop.y += drop.speed;
-              if (drop.y - (drop.length*20) > canvas.height) { drop.y = 0; drop.speed = Math.random() * 1 + 0.5; }
-            });
-            ctx.globalAlpha = 1.0;
-          } else if (activeTab === 'lab') {
-            for (let i = 0; i < 3; i++) {
-              ctx.beginPath();
-              for (let x = 0; x < canvas.width; x += 15) {
-                const y = canvas.height/2 + Math.sin(x * 0.003 + time + i) * 100 * (i+1)/3;
-                if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-              }
-              ctx.strokeStyle = `rgba(${baseColor}, ${0.1 + i*0.05})`;
-              ctx.lineWidth = 2;
-              ctx.stroke();
-            }
-          } else if (activeTab === 'dashboard') {
-            elements.forEach(orb => {
-              orb.x += orb.vx; orb.y += orb.vy;
-              if (orb.x < -orb.radius || orb.x > canvas.width + orb.radius) orb.vx *= -1;
-              if (orb.y < -orb.radius || orb.y > canvas.height + orb.radius) orb.vy *= -1;
-              const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.radius);
-              grad.addColorStop(0, `rgba(${baseColor}, 0.15)`);
-              grad.addColorStop(1, 'transparent');
-              ctx.beginPath(); ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2); 
-              ctx.fillStyle = grad; ctx.fill();
-            });
-          } else if (activeTab === 'timetable') {
-            ctx.fillStyle = `rgba(${baseColor}, 0.04)`;
-            elements.forEach(b => {
-              b.x += b.speed;
-              if (b.x > canvas.width) { b.x = -b.width; b.y = Math.random() * canvas.height; }
-              ctx.fillRect(b.x, b.y, b.width, 15);
-            });
-          } else if (activeTab === 'calc') {
-            ctx.strokeStyle = `rgba(${baseColor}, 0.2)`;
-            elements.forEach(b => {
-              b.y -= b.speed;
-              if (b.y < -50) { b.y = canvas.height + 50; b.x = Math.random() * canvas.width; }
-              ctx.beginPath(); ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2); ctx.stroke();
-            });
-          }
-
-          animationFrameId = requestAnimationFrame(draw);
-        };
-
-        window.addEventListener('resize', resize);
-        resize();
-        draw();
-
-        return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animationFrameId); };
-      }, [theme, enabled, activeTab]);
-
-      if (!enabled || theme === 'matrix') return null;
-      return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0 opacity-100 transition-opacity duration-1000" />;
-    };
-
-    // ==========================================
-    // CONFIGURATION
-    // ==========================================
-    const APP_CONFIG = {
-      name: "ECE Tools Hub",
-      version: "v8.0 Ultimate",
-      creator: "Jiyon Sebastian",
-      course: "First Year B.Tech ECE",
-      university: "Kerala Technological University (KTU)",
-      email: "jiyonjewel1019@gmail.com"
-    };
-
-    const KTU_SUBJECTS = [
-      { code: "MAT101", name: "Linear Algebra & Calculus", credits: 4 },
-      { code: "PHT100", name: "Engineering Physics", credits: 4 },
-      { code: "CYT100", name: "Engineering Chemistry", credits: 4 },
-      { code: "EST130", name: "Basics of EEE", credits: 4 },
-      { code: "EST110", name: "Engineering Graphics", credits: 3 },
-      { code: "EST120", name: "Basics of Civil & Mech", credits: 4 },
-      { code: "HUN101", name: "Life Skills", credits: 2 },
-    ];
-
-    const GRADES = { 'S': 10, 'A+': 9, 'A': 8.5, 'B+': 8, 'B': 7.5, 'C+': 7, 'C': 6.5, 'D': 6, 'P': 5.5, 'F': 0 };
-
-    const RESISTOR_COLORS = [
-      { name: 'Black', val: 0, mult: 1, hex: '#1E293B', text: '#fff' },
-      { name: 'Brown', val: 1, mult: 10, hex: '#92400E', text: '#fff' },
-      { name: 'Red', val: 2, mult: 100, hex: '#EF4444', text: '#fff' },
-      { name: 'Orange', val: 3, mult: 1000, hex: '#F97316', text: '#fff' },
-      { name: 'Yellow', val: 4, mult: 10000, hex: '#EAB308', text: '#000' },
-      { name: 'Green', val: 5, mult: 100000, hex: '#22C55E', text: '#fff' },
-      { name: 'Blue', val: 6, mult: 1000000, hex: '#3B82F6', text: '#fff' },
-      { name: 'Violet', val: 7, mult: 10000000, hex: '#8B5CF6', text: '#fff' },
-      { name: 'Gray', val: 8, mult: 100000000, hex: '#64748B', text: '#fff' },
-      { name: 'White', val: 9, mult: 1000000000, hex: '#F8FAFC', text: '#000' },
-    ];
-
-    const AWG_DATA = [
-      { awg: 10, dia: 2.588, res: 3.277 }, { awg: 12, dia: 2.053, res: 5.211 },
-      { awg: 14, dia: 1.628, res: 8.286 }, { awg: 16, dia: 1.291, res: 13.17 },
-      { awg: 18, dia: 1.024, res: 20.95 }, { awg: 20, dia: 0.812, res: 33.31 },
-      { awg: 22, dia: 0.645, res: 52.96 }, { awg: 24, dia: 0.511, res: 84.22 }
-    ];
-
-    const stripHTML = (html) => html ? html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : "No content available.";
-    const extractSnippet = (html) => stripHTML(html).length > 120 ? stripHTML(html).substring(0, 120) + "..." : stripHTML(html);
-
-    const FALLBACK_NEWS = [
-      {
-        title: "Advances in 2nm Silicon Production",
-        categories: ["VLSI"], pubDate: new Date().toISOString(),
-        description: "Semiconductor foundries have officially initiated early trial production of the 2-nanometer node...",
-        content: "<p>Semiconductor foundries have officially initiated early trial production of the 2-nanometer node. This represents a leap in VLSI design, pushing the boundaries of integration further than previously thought possible.</p><p>Implementing Gate-All-Around (GAA) FETs instead of traditional FinFETs promises to drastically reduce power consumption while increasing computational density.</p>",
-      },
-      {
-        title: "6G Spectrum Guidelines Focusing on THz Bands",
-        categories: ["TELECOM"], pubDate: new Date(Date.now() - 3600000).toISOString(), 
-        description: "Standard bodies have released preliminary guidelines for 6G telecommunications, heavily exploring the Terahertz spectrum...",
-        content: "<p>Standard bodies have released preliminary guidelines for 6G telecommunications. Moving beyond the millimeter-wave frequencies used in 5G, the new standards heavily explore the Terahertz (THz) spectrum, operating between 100 GHz and 10 THz.</p><p>This ultra-high frequency band is expected to deliver microsecond latency and terabit-per-second data rates.</p>",
-      },
-      {
-        title: "Updated Embedded Systems Industry Standards",
-        categories: ["INDUSTRY"], pubDate: new Date(Date.now() - 7200000).toISOString(),
-        description: "The embedded industry places a heavier emphasis on modern IoT frameworks and Edge AI processing...",
-        content: "<p>The embedded industry places a heavier emphasis on modern IoT frameworks, Edge AI processing, and real-time operating systems (RTOS), ensuring systems are equipped for Industry 4.0.</p><p>Hardware design is phasing out legacy 8-bit microcontrollers in favor of 32-bit ARM Cortex-M based architectures.</p>",
-      }
-    ];
-
-    // ==========================================
-    // COMPONENT WRAPPER
-    // ==========================================
-    const Widget = ({ title, icon: Icon, children, className = "", noPadding = false, onClick }) => (
-      <div 
-        onClick={onClick}
-        className={`relative bg-white/95 dark:bg-slate-900/80 backdrop-blur-3xl border border-slate-200/80 dark:border-slate-800/80 rounded-3xl transition-all duration-300 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] flex flex-col h-full ${noPadding ? '' : 'p-6 md:p-8'} ${onClick ? 'cursor-pointer hover:-translate-y-1' : ''} ${className}`}
-      >
-        {!noPadding && title && (
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200/80 dark:border-slate-800/50">
-            <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-400 rounded-2xl group-hover:bg-violet-600 group-hover:text-white transition-colors duration-300">
-                {Icon && <Icon className="w-5 h-5" />}
-              </div>
-              <h3 className="font-bold text-sm tracking-wide text-slate-900 dark:text-slate-100">
-                {title}
-              </h3>
-            </div>
-          </div>
-        )}
-        <div className={`relative z-10 flex-grow ${noPadding ? 'h-full flex flex-col' : ''}`}>{children}</div>
+// --- Toast Notification Component ---
+const Toast = ({ message, type, onClose }) => {
+  const isError = type === 'error';
+  return (
+    <div className={`flex items-start p-4 mb-3 bg-white dark:bg-slate-800 rounded shadow-lg border-l-4 ${isError ? 'border-red-500' : 'border-blue-500'} transition-all transform duration-300 ease-in-out w-full max-w-md`}>
+      <div className={`mt-0.5 ${isError ? 'text-red-500' : 'text-blue-500'}`}>
+        {isError ? <AlertCircle size={18} /> : <Info size={18} />}
       </div>
-    );
+      <div className="flex-1 ml-3 text-sm text-gray-800 dark:text-gray-100 font-medium">
+        {message}
+      </div>
+      <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+        <X size={16} />
+      </button>
+    </div>
+  );
+};
 
-    // ==========================================
-    // APP MODULES
-    // ==========================================
+export default function App() {
+  // --- State Management ---
+  const [messages, setMessages] = useState([
+    { role: 'assistant', text: 'Hello! I am your KTU Study Assistant. How can I help you with your syllabus today?' }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [theme, setTheme] = useState('ktu'); // 'light', 'dark', 'ktu'
+  const [toasts, setToasts] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKey, setApiKey] = useState(''); // User provided key for GitHub hosting
+  
+  const messagesEndRef = useRef(null);
 
-    // --- TIMETABLE ---
-    const TimetableView = ({ showToast }) => {
-      const defaultSchedule = {
-        Monday: ['MAT101', 'EST130', 'Lab', 'Lab'], Tuesday: ['PHT100', 'EST110', 'CYT100', 'Library'],
-        Wednesday: ['EST130', 'EST120', 'MAT101', 'HUN101'], Thursday: ['EST110', 'PHT100', 'EST120', 'Sports'],
-        Friday: ['CYT100', 'MAT101', 'EST130 Lab', 'EST130 Lab'],
-      };
-      
-      const [schedule, setSchedule] = useState(() => {
-        try { const saved = localStorage.getItem('ece_timetable'); return saved ? JSON.parse(saved) : defaultSchedule; } catch(e) { return defaultSchedule; }
-      });
-      
-      const [numPeriods, setNumPeriods] = useState(() => {
-        return Math.max(...Object.values(schedule).map(arr => arr.length), 4);
-      });
+  // --- Theme Handling ---
+  useEffect(() => {
+    document.documentElement.classList.remove('dark', 'ktu-theme');
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (theme === 'ktu') {
+      // We will handle KTU theme via custom classes, but it can also trigger standard dark/light shifts
+      document.documentElement.classList.add('ktu-theme');
+    }
+  }, [theme]);
 
-      const updatePeriod = (day, index, val) => {
-        const newDay = [...schedule[day]]; newDay[index] = val; setSchedule({...schedule, [day]: newDay});
-      };
-      
-      const saveTimetable = () => { localStorage.setItem('ece_timetable', JSON.stringify(schedule)); showToast("Timetable saved locally."); };
+  const toggleTheme = (newTheme) => {
+    setTheme(newTheme);
+    addToast(`Switched to ${newTheme} theme`, 'info');
+  };
 
-      const addPeriod = () => {
-        const newSch = {...schedule}; Object.keys(newSch).forEach(d => newSch[d].push("")); setSchedule(newSch); setNumPeriods(n => n + 1);
-      };
+  // --- Toast Management ---
+  const addToast = (message, type = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5000);
+  };
 
-      const removePeriod = () => {
-        if(numPeriods <= 1) return; const newSch = {...schedule}; Object.keys(newSch).forEach(d => newSch[d].pop()); setSchedule(newSch); setNumPeriods(n => n - 1);
-      };
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
-      return (
-        <div className="animate-in fade-in duration-700">
-          <Widget title="Weekly Schedule" icon={Calendar}>
-            <div className="flex justify-end space-x-2 mb-4">
-               <button onClick={addPeriod} className="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">+ Add Period</button>
-               <button onClick={removePeriod} className="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">- Remove Period</button>
-               <button onClick={saveTimetable} className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-1.5 rounded-lg text-xs font-bold tracking-widest uppercase shadow-md transition-colors ml-4">Save</button>
-            </div>
-            <div className="overflow-x-auto pb-4">
-              <div style={{ minWidth: `${100 + (numPeriods * 140)}px` }}>
-                <div className="flex items-center space-x-4 mb-4 px-4">
-                  <div className="w-20"></div>
-                  {Array.from({length: numPeriods}).map((_, i) => (
-                    <div key={i} className="flex-1 text-center text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-slate-400">Period {i+1}</div>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  {Object.keys(schedule).map(day => (
-                    <div key={day} className="flex items-center space-x-4 bg-slate-50/80 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/50 transition-colors">
-                      <div className="w-20 font-bold text-sm text-slate-900 dark:text-slate-200 tracking-wider">{day}</div>
-                      {schedule[day].map((period, i) => (
-                        <input key={i} type="text" value={period} onChange={(e) => updatePeriod(day, i, e.target.value)} className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm font-bold outline-none focus:border-violet-500 transition-all text-center text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 shadow-sm" placeholder="Free" />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Widget>
-        </div>
-      );
-    };
+  // Auto-scroll to bottom of chat
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-    // --- FRESH NEWS FEED ---
-    const NewsHubView = ({ showToast }) => {
-      const [news, setNews] = useState([]);
-      const [loading, setLoading] = useState(true);
-      const [activeArticle, setActiveArticle] = useState(null);
-      const [lastSync, setLastSync] = useState(new Date());
-
-      const RSS_FEEDS = [
-        'https://www.eetimes.com/feed/',
-        'https://hackaday.com/blog/feed/',
-        'https://spectrum.ieee.org/feeds/feed.rss'
-      ];
-
-      const fetchFreshNews = async () => {
-        setLoading(true); 
-        try {
-          const randomFeed = RSS_FEEDS[Math.floor(Math.random() * RSS_FEEDS.length)];
-          const targetUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(randomFeed + '?t=' + Date.now())}`;
-          
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 8000); 
-          const response = await fetch(targetUrl, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) throw new Error("Network error");
-          const data = await response.json();
-          
-          if (data?.status === 'ok' && Array.isArray(data.items)) {
-            const cleanNews = data.items.filter(item => !item.title.toLowerCase().includes('sponsor') && !item.description.toLowerCase().includes('sponsor'));
-            const shuffled = cleanNews.sort(() => 0.5 - Math.random()).slice(0, 9);
-            setNews(shuffled); setLastSync(new Date());
-          } else { throw new Error("Data parsing error"); }
-        } catch (err) {
-           showToast("Unable to fetch live feed. Offline mode active.");
-           if (news.length === 0) setNews(FALLBACK_NEWS);
-        } finally { setLoading(false); }
-      };
-
-      useEffect(() => {
-        if (news.length === 0) fetchFreshNews();
-        const intervalId = setInterval(fetchFreshNews, 600000); 
-        return () => clearInterval(intervalId);
-      }, []);
-
-      if (activeArticle) {
-        const articleBody = activeArticle.content && activeArticle.content.length > 50 ? activeArticle.content : activeArticle.description || "No content available.";
-        return (
-          <div className="animate-in fade-in duration-500 h-full flex flex-col relative z-20">
-            <button onClick={() => setActiveArticle(null)} className="flex items-center space-x-2 text-sm font-bold text-slate-800 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 mb-6 group w-fit bg-white/90 dark:bg-slate-900/80 px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-sm transition-all">
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /><span>Back to Feed</span>
-            </button>
-            <div className="flex-grow max-w-4xl mx-auto w-full bg-white/95 dark:bg-slate-900/90 backdrop-blur-3xl border border-slate-200/80 dark:border-slate-800/80 rounded-[2.5rem] shadow-xl overflow-hidden">
-              <div className="p-8 md:p-12 flex flex-col h-full">
-                <div className="flex flex-wrap gap-4 items-center justify-between mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
-                  <span className="bg-violet-100 text-violet-800 dark:bg-violet-500/20 dark:text-violet-300 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase">{activeArticle.categories?.[0] || 'UPDATE'}</span>
-                  <span className="text-sm font-bold text-slate-600 dark:text-slate-400 flex items-center"><Clock className="w-4 h-4 mr-2 opacity-70" />{new Date(activeArticle.pubDate || Date.now()).toLocaleString()}</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-8 text-slate-900 dark:text-white">{activeArticle.title || "Untitled"}</h2>
-                <div className="news-content flex-grow text-lg text-slate-800 dark:text-slate-300 font-sans" dangerouslySetInnerHTML={{ __html: articleBody }} />
-              </div>
-            </div>
-          </div>
-        );
+  // --- API Call Logic (with Exponential Backoff) ---
+  const fetchWithRetry = async (url, options, retries = 5) => {
+    const delays = [1000, 2000, 4000, 8000, 16000];
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        if (i === retries - 1) throw error;
+        await new Promise(res => setTimeout(res, delays[i]));
       }
+    }
+  };
 
-      return (
-        <div className="animate-in fade-in duration-700 h-full flex flex-col">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 border-b border-slate-300/60 dark:border-slate-800/60 pb-6 gap-4">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Tech News Feed</h2>
-            </div>
-            <div className="flex items-center space-x-4">
-               <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Updated: {lastSync.toLocaleTimeString()}</span>
-               <button onClick={fetchFreshNews} disabled={loading} className="flex items-center space-x-2 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-full shadow-md transition-colors disabled:opacity-50">
-                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                 <span className="text-xs font-bold uppercase tracking-wider">Refresh Feed</span>
-               </button>
-            </div>
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      // When hosted on GitHub, users must enter their own key in settings. 
+      // In this specific canvas environment, an empty string falls back to the system's key.
+      const activeApiKey = apiKey || ""; 
+      
+      // CRITICAL FIX: Using the correct model name supported by the v1beta environment API
+      const model = 'gemini-2.5-flash-preview-09-2025';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeApiKey}`;
+
+      const systemInstruction = "You are an expert academic tutor for students in the Kerala Technological University (KTU) in India. Always explain concepts clearly, syncing equations and terms to the KTU syllabus. Use proper engineering conventions, maintain an encouraging tone, and format mathematical formulas clearly.";
+
+      const payload = {
+        contents: [{ parts: [{ text: userMessage }] }],
+        systemInstruction: { parts: [{ text: systemInstruction }] }
+      };
+
+      const result = await fetchWithRetry(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const assistantMessage = result.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't generate a response. Please try again.";
+      setMessages(prev => [...prev, { role: 'assistant', text: assistantMessage }]);
+
+    } catch (error) {
+      console.error("API Error:", error);
+      addToast(`API Error: ${error.message}. If you are on GitHub, please ensure you have entered a valid API Key in the settings.`, 'error');
+      setMessages(prev => [...prev, { role: 'assistant', text: '*Error generating response. Please check the notifications.*' }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // --- Theme Styles ---
+  const getThemeClasses = () => {
+    switch (theme) {
+      case 'dark':
+        return 'bg-slate-900 text-slate-100';
+      case 'ktu':
+        return 'bg-gradient-to-br from-blue-50 to-indigo-100 text-slate-800'; // KTU themed light colors
+      default:
+        return 'bg-gray-50 text-gray-900'; // Light
+    }
+  };
+
+  const getChatContainerClasses = () => {
+    switch (theme) {
+      case 'dark':
+        return 'bg-slate-800 border-slate-700';
+      case 'ktu':
+        return 'bg-white border-blue-200 shadow-blue-100';
+      default:
+        return 'bg-white border-gray-200';
+    }
+  };
+
+  return (
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${getThemeClasses()}`}>
+      
+      {/* --- Toasts Container --- */}
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end space-y-2 pointer-events-none">
+        {toasts.map(toast => (
+          <div key={toast.id} className="pointer-events-auto w-full max-w-sm">
+            <Toast 
+              message={toast.message} 
+              type={toast.type} 
+              onClose={() => removeToast(toast.id)} 
+            />
           </div>
-          {loading ? (
-            <div className="flex-grow flex items-center justify-center">
-              <div className="flex flex-col items-center space-y-6">
-                 <div className="w-12 h-12 border-4 border-slate-200 dark:border-slate-800 border-t-violet-600 dark:border-t-violet-400 rounded-full animate-spin"></div>
+        ))}
+      </div>
+
+      {/* --- Header --- */}
+      <header className={`p-4 shadow-sm border-b flex justify-between items-center transition-colors ${theme === 'dark' ? 'bg-slate-800 border-slate-700' : theme === 'ktu' ? 'bg-indigo-900 text-white border-indigo-800' : 'bg-white border-gray-200'}`}>
+        <div className="flex items-center gap-2">
+          <BookOpen className={theme === 'ktu' ? 'text-yellow-400' : 'text-blue-500'} size={24} />
+          <h1 className="text-xl font-bold tracking-tight">KTU Study Assistant</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Theme Switchers */}
+          <button onClick={() => toggleTheme('light')} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="Light Theme">
+            <Sun size={18} />
+          </button>
+          <button onClick={() => toggleTheme('dark')} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="Dark Theme">
+            <Moon size={18} />
+          </button>
+          <button onClick={() => toggleTheme('ktu')} className="p-2 rounded-full hover:bg-black/10 transition-colors" title="KTU Theme">
+            <GraduationCap size={18} />
+          </button>
+          <div className="w-px h-6 bg-current opacity-20 mx-1"></div>
+          {/* Settings Toggle */}
+          <button onClick={() => setShowSettings(!showSettings)} className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-black/20' : 'hover:bg-black/10'}`} title="Settings">
+            <Settings size={18} />
+          </button>
+        </div>
+      </header>
+
+      {/* --- Main Chat Area --- */}
+      <main className="flex-1 flex overflow-hidden">
+        
+        {/* Chat Messages */}
+        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full relative">
+          
+          {/* Settings Panel (Overlay) */}
+          {showSettings && (
+            <div className={`absolute top-0 right-0 z-10 m-4 p-4 rounded-lg shadow-xl border w-80 transition-all ${theme === 'dark' ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-200'}`}>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Settings size={16} /> Configuration
+                </h3>
+                <button onClick={() => setShowSettings(false)}><X size={16} /></button>
               </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
-              {news.map((item, index) => (
-                <div key={index} onClick={() => setActiveArticle(item)} className="bg-white/95 dark:bg-slate-900/80 backdrop-blur-2xl border border-slate-200/80 dark:border-slate-800/80 overflow-hidden rounded-3xl group cursor-pointer hover:-translate-y-1 transition-all shadow-sm hover:shadow-lg flex flex-col h-full">
-                   <div className="p-6 md:p-8 flex flex-col h-full justify-between">
-                     <div>
-                       <div className="flex justify-between items-center mb-5">
-                         <span className={`text-xs font-bold tracking-wider px-3 py-1 rounded-full ${index === 0 ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-300'}`}>
-                           {item.categories?.[0] || 'UPDATE'}
-                         </span>
-                       </div>
-                       <h3 className="text-lg font-bold leading-snug text-slate-900 dark:text-slate-100 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-3">{item.title}</h3>
-                       <p className="mt-4 text-sm text-slate-700 dark:text-slate-400 line-clamp-3 leading-relaxed">{extractSnippet(item.description)}</p>
-                     </div>
-                     <div className="mt-8 pt-5 border-t border-slate-200 dark:border-slate-800/50 flex items-center justify-between text-violet-600 dark:text-violet-400 font-bold">
-                       <span className="text-sm">Read More</span><ChevronRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
-                     </div>
-                   </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium mb-1 opacity-80">Gemini API Key (For GitHub Hosting)</label>
+                  <input 
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your API Key..."
+                    className={`w-full px-3 py-2 rounded border text-sm ${theme === 'dark' ? 'bg-slate-700 border-slate-600 text-white' : 'bg-gray-50 border-gray-300'}`}
+                  />
+                  <p className="text-[10px] mt-1 opacity-70">
+                    Leave blank if testing in the original preview environment. Required for standalone use.
+                  </p>
                 </div>
-              ))}
+              </div>
             </div>
           )}
-        </div>
-      );
-    };
 
-    // --- DASHBOARD ---
-    const DashboardView = () => {
-      const [timeLeft, setTimeLeft] = useState(25 * 60);
-      const [isActive, setIsActive] = useState(false);
-      const [tasks, setTasks] = useState(() => {
-        try { const saved = localStorage.getItem('ece_tasks'); return saved ? JSON.parse(saved) : [ { id: '1', text: "Review notes", done: false } ]; } catch(e) { return []; }
-      });
-      const [newTask, setNewTask] = useState("");
-
-      useEffect(() => { localStorage.setItem('ece_tasks', JSON.stringify(tasks)); }, [tasks]);
-      useEffect(() => {
-        let int = null;
-        if (isActive && timeLeft > 0) int = setInterval(() => setTimeLeft(t => t - 1), 1000);
-        else if (timeLeft === 0) setIsActive(false);
-        return () => clearInterval(int);
-      }, [isActive, timeLeft]);
-
-      const toggleTask = (id) => setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
-      const addTask = (e) => {
-        if (e.key === 'Enter' && newTask.trim()) { setTasks([{ id: Date.now().toString(), text: newTask, done: false }, ...tasks]); setNewTask(""); }
-      };
-
-      return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in duration-700">
-          <Widget title="Focus Timer" icon={Clock}>
-             <div className="flex flex-col items-center justify-center h-full py-6">
-               <div className="relative w-64 h-64 flex items-center justify-center mb-10 group">
-                 <div className="absolute inset-0 rounded-full bg-violet-50 dark:bg-violet-500/5 group-hover:scale-105 transition-transform duration-500"></div>
-                 <svg className="absolute inset-0 w-full h-full -rotate-90 z-10" viewBox="0 0 100 100">
-                   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-200 dark:text-slate-800" />
-                   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="4" className="text-violet-600 transition-all duration-1000 ease-linear" strokeDasharray="301.59" strokeDashoffset={301.59 - (301.59 * timeLeft) / (25 * 60)} strokeLinecap="round" />
-                 </svg>
-                 <div className="text-6xl font-light font-mono tracking-tighter text-slate-900 dark:text-white z-20">
-                    {Math.floor(timeLeft / 60).toString().padStart(2, '0')}:{(timeLeft % 60).toString().padStart(2, '0')}
-                 </div>
-               </div>
-               <div className="flex space-x-4 w-full">
-                 <button onClick={() => setIsActive(!isActive)} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-4 rounded-2xl text-sm font-bold tracking-wide active:scale-95 transition-all flex items-center justify-center shadow-lg shadow-violet-500/20">
-                   {isActive ? <Pause className="w-5 h-5 mr-2 fill-current"/> : <Play className="w-5 h-5 mr-2 fill-current"/>} {isActive ? 'Pause' : 'Start'}
-                 </button>
-                 <button onClick={() => {setIsActive(false); setTimeLeft(25*60);}} className="px-6 border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-400 rounded-2xl transition-colors flex items-center justify-center bg-white dark:bg-slate-900">
-                   <RotateCcw className="w-5 h-5" />
-                 </button>
-               </div>
-             </div>
-          </Widget>
-
-          <Widget title="Tasks & Assignments" icon={ListTodo}>
-            <div className="flex flex-col h-full">
-              <div className="relative mb-6">
-                <input type="text" placeholder="Add new task... (Press Enter)" value={newTask} onChange={(e) => setNewTask(e.target.value)} onKeyDown={addTask} className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl py-4 px-5 text-sm font-semibold outline-none focus:border-violet-500 transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-500 shadow-sm" />
-              </div>
-              <div className="space-y-3 overflow-y-auto max-h-[350px] pr-2">
-                {tasks.map(task => (
-                  <div key={task.id} className={`flex items-start space-x-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${task.done ? 'bg-slate-50 border-slate-50 dark:bg-slate-900/30 dark:border-slate-800/30 opacity-60' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700'}`} onClick={() => toggleTask(task.id)}>
-                    <button className="mt-0.5 shrink-0 transition-transform hover:scale-110">
-                      {task.done ? <CheckCircle className="w-6 h-6 text-emerald-500" /> : <Circle className="w-6 h-6 text-slate-400 dark:text-slate-600" />}
-                    </button>
-                    <span className={`text-sm leading-relaxed pt-0.5 font-bold ${task.done ? 'line-through text-slate-500' : 'text-slate-900 dark:text-slate-200'}`}>{task.text}</span>
+          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
+                  msg.role === 'user' 
+                    ? (theme === 'ktu' ? 'bg-indigo-600 text-white' : theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                    : getChatContainerClasses()
+                }`}>
+                  <div className="text-xs font-semibold mb-1 opacity-75">
+                    {msg.role === 'user' ? 'You' : 'KTU Assistant'}
                   </div>
-                ))}
+                  {/* Basic text rendering. Note: For complex equations, a markdown parser like react-markdown + remark-math would be ideal */}
+                  <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                    {msg.text}
+                  </div>
+                </div>
               </div>
-            </div>
-          </Widget>
-        </div>
-      );
-    };
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm flex items-center space-x-2 ${getChatContainerClasses()}`}>
+                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-current animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-    // --- ENGINEERING TOOLS ---
-    const ToolsView = () => {
-      const [activeTool, setActiveTool] = useState('bjt'); 
-
-      // Existing Tools State
-      const [bands, setBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[2]]); 
-      const resValue = useMemo(() => (bands[0].val * 10 + bands[1].val) * bands[2].mult, [bands]);
-      const [indBands, setIndBands] = useState([RESISTOR_COLORS[1], RESISTOR_COLORS[0], RESISTOR_COLORS[1]]); 
-      const indValue = useMemo(() => (indBands[0].val * 10 + indBands[1].val) * indBands[2].mult, [indBands]);
-      const [bases, setBases] = useState({ dec: '255', bin: '11111111', hex: 'FF' });
-      const [rFreq, setRFreq] = useState(50); const [rL, setRL] = useState(10); const [rC, setRC] = useState(10);
-      const [opRf, setOpRf] = useState(10); const [opRin, setOpRin] = useState(1);
-      const [ledVs, setLedVs] = useState(5); const [ledVf, setLedVf] = useState(2); const [ledIf, setLedIf] = useState(20);
-      const [pwrV, setPwrV] = useState(12); const [pwrI, setPwrI] = useState(2);
-      const [dbV1, setDbV1] = useState(1); const [dbV2, setDbV2] = useState(10);
-      const [waveF, setWaveF] = useState(300);
-      const [awgSel, setAwgSel] = useState(20); const awgData = AWG_DATA.find(a => a.awg === Number(awgSel)) || AWG_DATA[0];
-      const [tCurr, setTCurr] = useState(1); const [tThick, setTThick] = useState(1);
-      const [vdV, setVdV] = useState(12); const [vdR1, setVdR1] = useState(1000); const [vdR2, setVdR2] = useState(2000);
-      const [rcR, setRcR] = useState(10); const [rcC, setRcC] = useState(100);
-      const [t5R1, setT5R1] = useState(1); const [t5R2, setT5R2] = useState(10); const [t5C, setT5C] = useState(10);
-
-      // New Tools State
-      const [bjtVcc, setBjtVcc] = useState(12);
-      const [bjtRc, setBjtRc] = useState(2);
-      const [bjtRb, setBjtRb] = useState(470);
-      const [bjtBeta, setBjtBeta] = useState(100);
-
-      const [rlcR, setRlcR] = useState(100);
-      const [rlcL, setRlcL] = useState(100);
-      const [rlcC, setRlcC] = useState(10);
-      const [rlcF, setRlcF] = useState(50);
-
-      const [lineCode, setLineCode] = useState("10110");
-
-      const formatUnit = (val, unit) => {
-        if (val >= 1e6) return (val / 1e6).toFixed(2) + ' M' + unit;
-        if (val >= 1e3) return (val / 1e3).toFixed(2) + ' k' + unit;
-        return val.toFixed(2) + ' ' + unit;
-      };
-
-      const updateBases = (val, base) => {
-        if (!val) { setBases({ dec: '', bin: '', hex: '' }); return; }
-        try { const parsed = parseInt(val, base); if (isNaN(parsed)) return; setBases({ dec: parsed.toString(10), bin: parsed.toString(2), hex: parsed.toString(16).toUpperCase() }); } catch(e) {}
-      };
-
-      const t5Freq = useMemo(() => { if(t5R1===0 && t5R2===0) return 0; return 1.44 / (((t5R1*1000) + 2*(t5R2*1000)) * (t5C/1000000)); }, [t5R1, t5R2, t5C]);
-      const t5Duty = useMemo(() => { if(t5R1===0 && t5R2===0) return 0; return ((t5R1 + t5R2) / (t5R1 + 2*t5R2)) * 100; }, [t5R1, t5R2]);
-
-      // BJT Calculations
-      const bjtIb = (bjtVcc - 0.7) / (bjtRb * 1000); 
-      const bjtIc = Math.min(bjtBeta * bjtIb, bjtVcc / (bjtRc * 1000)); 
-      const bjtVce = Math.max(0, bjtVcc - (bjtIc * (bjtRc * 1000))); 
-
-      // Phasor Calculations
-      const xl = 2 * Math.PI * rlcF * (rlcL/1000);
-      const xc = 1 / (2 * Math.PI * rlcF * (rlcC/1e6));
-      const z = Math.sqrt(rlcR*rlcR + Math.pow(xl-xc, 2));
-
-      const TOOL_TABS = [
-        { id: 'bjt', label: 'BJT Load Line', icon: TrendingUp },
-        { id: 'phasor', label: 'RLC Phasor', icon: Compass }, 
-        { id: 'linecode', label: 'Digital Coding', icon: BarChart },
-        { id: 'resistor', label: 'Resistor Code', icon: Layers },
-        { id: 'inductor', label: 'Inductor Code', icon: Layers },
-        { id: 'divider', label: 'Voltage Divider', icon: Zap },
-        { id: 'rctime', label: 'RC Time Constant', icon: Clock },
-        { id: 'reactance', label: 'Reactance Calc', icon: Zap },
-        { id: 'opamp', label: 'Op-Amp Gain', icon: Activity },
-        { id: 'led', label: 'LED Resistor', icon: Sun },
-        { id: 'power', label: 'Power Calc', icon: Zap },
-        { id: 'db', label: 'Decibel (dB)', icon: Sliders },
-        { id: 'wavelength', label: 'Wavelength', icon: Radio },
-        { id: 'awg', label: 'AWG Lookup', icon: Hash },
-        { id: 'trace', label: 'PCB Trace', icon: Terminal },
-        { id: 'timer555', label: '555 Timer', icon: Clock },
-        { id: 'base', label: 'Base Converter', icon: Hash }
-      ];
-
-      return (
-        <div className="space-y-6 animate-in fade-in duration-700">
-          <div className="bg-white/95 dark:bg-slate-900/80 p-2 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
-            {TOOL_TABS.map(tab => (
+          {/* Input Area */}
+          <div className={`p-4 border-t ${theme === 'dark' ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-transparent'}`}>
+            <div className={`flex items-end gap-2 p-2 rounded-xl border shadow-sm transition-colors ${getChatContainerClasses()}`}>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask a question about the KTU syllabus..."
+                className="flex-1 max-h-32 bg-transparent outline-none resize-none px-2 py-1 text-sm text-current"
+                rows="1"
+                style={{ minHeight: '40px' }}
+              />
               <button 
-                key={tab.id} onClick={() => setActiveTool(tab.id)} 
-                className={`flex items-center space-x-2 text-xs font-bold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${
-                  activeTool === tab.id ? 'bg-violet-600 text-white shadow-md scale-105' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                className={`p-2.5 rounded-lg flex-shrink-0 transition-all ${
+                  !input.trim() || isLoading 
+                    ? 'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-slate-700' 
+                    : (theme === 'ktu' ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md')
                 }`}
               >
-                <tab.icon className="w-3.5 h-3.5" /><span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-8">
-            
-            {activeTool === 'bjt' && (
-              <Widget title="BJT DC Load Line & Q-Point" icon={TrendingUp}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Supply Voltage Vcc (V)</label><input type="number" value={bjtVcc} onChange={e=>setBjtVcc(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Collector Resistor Rc (kΩ)</label><input type="number" value={bjtRc} onChange={e=>setBjtRc(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Base Resistor Rb (kΩ)</label><input type="number" value={bjtRb} onChange={e=>setBjtRb(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Current Gain Beta</label><input type="number" value={bjtBeta} onChange={e=>setBjtBeta(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700 shadow-inner relative overflow-hidden">
-                      <div className="absolute top-4 left-4 text-xs font-bold text-slate-400">Load Line Graph</div>
-                      <svg viewBox="-10 -10 120 120" className="w-full h-full overflow-visible mt-4">
-                        <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
-                        <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
-                        <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 font-bold">Vce (V)</text>
-                        <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 font-bold">Ic (mA)</text>
-                        
-                        {bjtVcc > 0 && bjtRc > 0 && (
-                          <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" strokeDasharray="2 2" className="opacity-70" /> 
-                        )}
-                        <line x1="0" y1="0" x2="100" y2="100" stroke="#8B5CF6" strokeWidth="2" />
-                        
-                        <circle cx={(bjtVce/bjtVcc)*100 || 0} cy={100 - ((bjtIc*1000)/(bjtVcc/bjtRc))*100 || 0} r="4" fill="#10B981" className="shadow-xl" />
-                        
-                        <text x="50" y="-15" fill="currentColor" fontSize="6" textAnchor="middle" className="font-mono text-emerald-500 font-bold">
-                          Q-Point: {bjtVce.toFixed(2)}V, {(bjtIc*1000).toFixed(2)}mA
-                        </text>
-                      </svg>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'phasor' && (
-              <Widget title="RLC Phasor Diagram" icon={Globe}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistance (Ω)</label><input type="number" value={rlcR} onChange={e=>setRlcR(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Inductance (mH)</label><input type="number" value={rlcL} onChange={e=>setRlcL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Capacitance (µF)</label><input type="number" value={rlcC} onChange={e=>setRlcC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Frequency (Hz)</label><input type="number" value={rlcF} onChange={e=>setRlcF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-800 shadow-xl overflow-hidden relative">
-                      <svg viewBox="-100 -100 200 200" className="w-full h-full overflow-visible">
-                        <line x1="-100" y1="0" x2="100" y2="0" stroke="#334155" strokeWidth="1" strokeDasharray="4 4"/>
-                        <line x1="0" y1="-100" x2="0" y2="100" stroke="#334155" strokeWidth="1" strokeDasharray="4 4"/>
-                        
-                        {(() => {
-                          const max = Math.max(rlcR, xl, xc) || 1;
-                          const sR = (rlcR / max) * 80;
-                          const sXL = (xl / max) * 80;
-                          const sXC = (xc / max) * 80;
-                          return (
-                            <g>
-                              <line x1="0" y1="0" x2={sR} y2="0" stroke="#10B981" strokeWidth="4" />
-                              <text x={sR + 10} y="5" fill="#10B981" fontSize="12" fontWeight="bold">R</text>
-                              
-                              <line x1="0" y1="0" x2="0" y2={-sXL} stroke="#3B82F6" strokeWidth="4" />
-                              <text x="-20" y={-sXL - 5} fill="#3B82F6" fontSize="12" fontWeight="bold">XL</text>
-                              
-                              <line x1="0" y1="0" x2="0" y2={sXC} stroke="#EC4899" strokeWidth="4" />
-                              <text x="-20" y={sXC + 15} fill="#EC4899" fontSize="12" fontWeight="bold">XC</text>
-                              
-                              <line x1="0" y1="0" x2={sR} y2={sXC - sXL} stroke="#F59E0B" strokeWidth="2" strokeDasharray="2 2" />
-                              <circle cx={sR} cy={sXC - sXL} r="4" fill="#F59E0B" />
-                            </g>
-                          )
-                        })()}
-                      </svg>
-                      <div className="absolute bottom-4 left-4 text-xs font-mono text-white">Z = {z.toFixed(2)} Ω</div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'linecode' && (
-              <Widget title="Digital Line Coding" icon={BarChart}>
-                 <div className="grid grid-cols-1 gap-8 py-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Binary Data Sequence</label>
-                      <input type="text" value={lineCode} onChange={e=>setLineCode(e.target.value.replace(/[^01]/g, ''))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-4 px-6 mt-2 text-2xl font-mono tracking-widest outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" />
-                    </div>
-                    
-                    <div className="space-y-6">
-                      <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">NRZ-L (Non-Return-to-Zero Level)</div>
-                        <svg viewBox={`0 0 ${lineCode.length * 40 || 40} 40`} className="w-full h-16 overflow-visible">
-                          <path d={`M 0,${lineCode[0]==='1'?0:40} ` + lineCode.split('').map((b,i) => `L ${i*40},${b==='1'?0:40} L ${(i+1)*40},${b==='1'?0:40}`).join(' ')} fill="none" stroke="#8B5CF6" strokeWidth="3" strokeLinejoin="round" />
-                          {lineCode.split('').map((b,i) => <text key={i} x={i*40 + 20} y="-10" fill="currentColor" fontSize="10" className="text-slate-400" textAnchor="middle">{b}</text>)}
-                        </svg>
-                      </div>
-                      <div className="bg-slate-100 dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Manchester (IEEE 802.3)</div>
-                        <svg viewBox={`0 0 ${lineCode.length * 40 || 40} 40`} className="w-full h-16 overflow-visible">
-                          <path d={`M 0,${lineCode[0]==='1'?0:40} ` + lineCode.split('').map((b,i) => {
-                            if(b==='1') return `L ${i*40},0 L ${i*40 + 20},0 L ${i*40 + 20},40 L ${(i+1)*40},40`;
-                            else return `L ${i*40},40 L ${i*40 + 20},40 L ${i*40 + 20},0 L ${(i+1)*40},0`;
-                          }).join(' ')} fill="none" stroke="#10B981" strokeWidth="3" strokeLinejoin="round" />
-                          {lineCode.split('').map((b,i) => <text key={i} x={i*40 + 20} y="-10" fill="currentColor" fontSize="10" className="text-slate-400" textAnchor="middle">{b}</text>)}
-                        </svg>
-                      </div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {/* Existing Tools Follow... */}
-            {activeTool === 'resistor' && (
-              <Widget title="4-Band Resistor Decoder" icon={Layers}>
-                 <div className="flex flex-col items-center py-4">
-                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-900 dark:text-white mb-8">{formatUnit(resValue, 'Ω')}</div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
-                    {[0, 1, 2].map(bIdx => (
-                      <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
-                        value={bands[bIdx].name} style={{ backgroundColor: bands[bIdx].hex, color: bands[bIdx].text }}
-                        onChange={(e) => { const newBands = [...bands]; newBands[bIdx] = RESISTOR_COLORS.find(c => c.name === e.target.value); setBands(newBands); }}>
-                        {RESISTOR_COLORS.map(c => <option key={c.name} value={c.name} style={{ backgroundColor: c.hex, color: c.text }}>{c.name}</option>)}
-                      </select>
-                    ))}
-                  </div>
-                </div>
-              </Widget>
-            )}
-
-            {activeTool === 'inductor' && (
-              <Widget title="Inductor Color Decoder" icon={Layers}>
-                 <div className="flex flex-col items-center py-4">
-                  <div className="text-6xl font-bold font-mono tracking-tighter text-slate-900 dark:text-white mb-8">{formatUnit(indValue, 'µH')}</div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
-                    {[0, 1, 2].map(bIdx => (
-                      <select key={bIdx} className="w-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-2xl p-4 text-base font-bold outline-none cursor-pointer text-center shadow-sm hover:shadow-md transition-all appearance-none"
-                        value={indBands[bIdx].name} style={{ backgroundColor: indBands[bIdx].hex, color: indBands[bIdx].text }}
-                        onChange={(e) => { const newBands = [...indBands]; newBands[bIdx] = RESISTOR_COLORS.find(c => c.name === e.target.value); setIndBands(newBands); }}>
-                        {RESISTOR_COLORS.map(c => <option key={c.name} value={c.name} style={{ backgroundColor: c.hex, color: c.text }}>{c.name}</option>)}
-                      </select>
-                    ))}
-                  </div>
-                </div>
-              </Widget>
-            )}
-
-            {activeTool === 'divider' && (
-              <Widget title="Voltage Divider Calculator" icon={Zap}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Input Voltage (Vin)</label><input type="number" value={vdV} onChange={e=>setVdV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistor R1 (Ohms)</label><input type="number" value={vdR1} onChange={e=>setVdR1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistor R2 (Ohms)</label><input type="number" value={vdR2} onChange={e=>setVdR2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Output Voltage (Vout)</div>
-                      <div className="text-6xl font-mono font-bold">{(vdR1+vdR2)>0 ? (vdV * (vdR2 / (vdR1+vdR2))).toFixed(2) : 0} V</div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'rctime' && (
-              <Widget title="RC Time Constant Calculator" icon={Clock}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Resistance (kΩ)</label><input type="number" value={rcR} onChange={e=>setRcR(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase">Capacitance (µF)</label><input type="number" value={rcC} onChange={e=>setRcC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Time Constant (Tau)</div><div className="text-4xl font-mono font-bold">{((rcR*1000)*(rcC/1e6)).toFixed(3)} s</div></div>
-                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Full Charge (5*Tau)</div><div className="text-3xl font-mono font-bold">{(5*(rcR*1000)*(rcC/1e6)).toFixed(3)} s</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'base' && (
-              <Widget title="Number System Converter" icon={Hash}>
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-4 block">Decimal (Base 10)</label>
-                      <input type="text" value={bases.dec} onChange={e => updateBases(e.target.value, 10)} className="w-full bg-transparent border-b-2 border-slate-300 dark:border-slate-600 py-2 text-2xl font-mono font-bold outline-none focus:border-violet-500 text-slate-900 dark:text-white" />
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <label className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-4 block">Binary (Base 2)</label>
-                      <input type="text" value={bases.bin} onChange={e => updateBases(e.target.value, 2)} className="w-full bg-transparent border-b-2 border-sky-300 dark:border-sky-700 py-2 text-2xl font-mono font-bold outline-none focus:border-sky-500 text-sky-600 dark:text-sky-400" />
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <label className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider mb-4 block">Hexadecimal (Base 16)</label>
-                      <input type="text" value={bases.hex} onChange={e => updateBases(e.target.value, 16)} className="w-full bg-transparent border-b-2 border-pink-300 dark:border-pink-700 py-2 text-2xl font-mono font-bold outline-none focus:border-pink-500 text-pink-600 dark:text-pink-400 uppercase" />
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'reactance' && (
-              <Widget title="Reactance Calculator" icon={Zap}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Frequency (Hz)</label><input type="number" value={rFreq} onChange={e=>setRFreq(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Inductance (mH)</label><input type="number" value={rL} onChange={e=>setRL(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Capacitance (µF)</label><input type="number" value={rC} onChange={e=>setRC(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
-                      <div className="mb-6"><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Inductive Reactance (XL)</div><div className="text-4xl font-mono font-bold text-violet-800 dark:text-violet-300">{(2 * Math.PI * rFreq * (rL/1000)).toFixed(2)} Ω</div></div>
-                      <div><div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-1">Capacitive Reactance (XC)</div><div className="text-4xl font-mono font-bold text-violet-800 dark:text-violet-300">{(rFreq && rC ? (1 / (2 * Math.PI * rFreq * (rC/1e6))) : 0).toFixed(2)} Ω</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'opamp' && (
-              <Widget title="Operational Amplifier" icon={Activity}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Feedback Resistor (Rf) kΩ</label><input type="number" value={opRf} onChange={e=>setOpRf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Input Resistor (Rin) kΩ</label><input type="number" value={opRin} onChange={e=>setOpRin(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-800 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-white shadow-xl">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1">Inverting Gain</div><div className="text-4xl font-mono font-bold">-{opRin ? (opRf / opRin).toFixed(2) : 0}</div></div>
-                      <div><div className="text-xs font-bold text-sky-400 uppercase tracking-widest mb-1">Non-Inverting Gain</div><div className="text-4xl font-mono font-bold">+{opRin ? (1 + (opRf / opRin)).toFixed(2) : 0}</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'led' && (
-              <Widget title="LED Resistor" icon={Sun}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Source Voltage (Vs) V</label><input type="number" value={ledVs} onChange={e=>setLedVs(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">LED Forward Voltage (Vf) V</label><input type="number" value={ledVf} onChange={e=>setLedVf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">LED Forward Current (If) mA</label><input type="number" value={ledIf} onChange={e=>setLedIf(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-amber-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-amber-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-amber-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
-                      <div className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest mb-2">Required Resistor</div>
-                      <div className="text-6xl font-mono font-bold">{(ledIf && (ledVs > ledVf)) ? ((ledVs - ledVf) / (ledIf / 1000)).toFixed(0) : 0} Ω</div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'power' && (
-              <Widget title="Power Calculator" icon={Zap}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Voltage (V)</label><input type="number" value={pwrV} onChange={e=>setPwrV(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Current (I)</label><input type="number" value={pwrI} onChange={e=>setPwrI(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Power (P = V×I)</div><div className="text-5xl font-mono font-bold">{(pwrV * pwrI).toFixed(2)} W</div></div>
-                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Resistance (R = V/I)</div><div className="text-3xl font-mono font-bold">{pwrI ? (pwrV / pwrI).toFixed(2) : 0} Ω</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'db' && (
-              <Widget title="Decibel Converter" icon={Sliders}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Input Value</label><input type="number" value={dbV1} onChange={e=>setDbV1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Output Value</label><input type="number" value={dbV2} onChange={e=>setDbV2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/50 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-700/50 shadow-sm text-slate-900 dark:text-white">
-                      <div className="mb-6"><div className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-1">Voltage Gain (20 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (20 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
-                      <div><div className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-1">Power Gain (10 log)</div><div className="text-4xl font-mono font-bold">{dbV1 && dbV1>0 && dbV2>0 ? (10 * Math.log10(dbV2/dbV1)).toFixed(2) : 0} dB</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'wavelength' && (
-              <Widget title="Wavelength" icon={Radio}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Frequency (MHz)</label><input type="number" value={waveF} onChange={e=>setWaveF(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
-                      <div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">Wavelength (c/f)</div>
-                      <div className="text-6xl font-mono font-bold">{(waveF && waveF > 0) ? (299.792 / waveF).toFixed(4) : 0} m</div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'awg' && (
-              <Widget title="AWG Reference" icon={Hash}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Select AWG Size</label>
-                        <select value={awgSel} onChange={e=>setAwgSel(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 appearance-none text-slate-900 dark:text-white font-bold shadow-sm">
-                          {AWG_DATA.map(a => <option key={a.awg} value={a.awg}>AWG {a.awg}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Diameter</div><div className="text-4xl font-mono font-bold">{awgData.dia} mm</div></div>
-                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Resistance</div><div className="text-4xl font-mono font-bold">{awgData.res} Ω/km</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'trace' && (
-              <Widget title="PCB Trace Width" icon={Terminal}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Current (Amps)</label><input type="number" value={tCurr} onChange={e=>setTCurr(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Temp Rise (°C)</label><input type="number" value={tThick} onChange={e=>setTThick(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" placeholder="e.g. 10" /></div>
-                    </div>
-                    <div className="bg-violet-50 dark:bg-slate-800 p-8 rounded-3xl flex flex-col items-center justify-center border border-violet-200 dark:border-slate-700 shadow-sm text-slate-900 dark:text-white">
-                      <div className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">Estimated Trace Width</div>
-                      <div className="text-6xl font-mono font-bold">{tCurr && tThick ? ((tCurr / (0.048 * Math.pow(tThick, 0.44))) ** (1/0.725) / 1.378).toFixed(2) : 0} mm</div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-            {activeTool === 'timer555' && (
-              <Widget title="555 Timer Calculator (Astable)" icon={Clock}>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    <div className="space-y-4">
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Resistor R1 (kΩ)</label><input type="number" value={t5R1} onChange={e=>setT5R1(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Resistor R2 (kΩ)</label><input type="number" value={t5R2} onChange={e=>setT5R2(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                      <div><label className="text-xs font-bold text-slate-800 dark:text-slate-400 uppercase">Capacitor C (µF)</label><input type="number" value={t5C} onChange={e=>setT5C(Number(e.target.value))} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl py-3 px-4 mt-2 outline-none focus:border-violet-500 text-slate-900 dark:text-white font-bold" /></div>
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl flex flex-col justify-center text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="mb-6"><div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Frequency (f)</div><div className="text-4xl font-mono font-bold">{t5Freq.toFixed(2)} Hz</div></div>
-                      <div><div className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest mb-1">Duty Cycle (D)</div><div className="text-4xl font-mono font-bold">{t5Duty.toFixed(1)} %</div></div>
-                    </div>
-                 </div>
-              </Widget>
-            )}
-
-          </div>
-        </div>
-      );
-    };
-
-    // --- VIRTUAL LABS ---
-    const VirtualLabManager = ({ animations }) => {
-      const [activeLab, setActiveLab] = useState('cro'); 
-      const LAB_TABS = [
-        { id: 'cro', label: 'Oscilloscope', icon: Monitor },
-        { id: 'rect', label: 'Half-Wave Rectifier', icon: Activity },
-        { id: 'frect', label: 'Full-Wave Rectifier', icon: Activity },
-        { id: 'zener', label: 'Zener Diode', icon: Activity },
-        { id: 'ohms', label: "Ohm's Law", icon: Zap },
-        { id: 'filter', label: 'Low Pass Filter', icon: Radio },
-        { id: 'reson', label: 'Series Resonance', icon: Globe },
-        { id: 'transformer', label: 'Transformer', icon: Layers },
-        { id: 'gates', label: 'Boolean Logic', icon: GitBranch }
-      ];
-
-      return (
-        <div className="space-y-6 animate-in fade-in duration-700">
-          <div className="bg-white/95 dark:bg-slate-900/80 p-2 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl flex flex-wrap justify-center gap-2 backdrop-blur-xl shadow-sm">
-            {LAB_TABS.map(tab => (
-              <button key={tab.id} onClick={() => setActiveLab(tab.id)} className={`flex items-center space-x-2 text-xs font-bold tracking-wide px-4 py-2.5 rounded-2xl transition-all duration-300 ${ activeLab === tab.id ? 'bg-violet-600 text-white shadow-md scale-105' : 'text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-300' }`}>
-                <tab.icon className="w-3.5 h-3.5" /><span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-8">
-            {activeLab === 'cro' && <CROVisualizer animations={animations} />}
-            {activeLab === 'rect' && <RectifierVisualizer animations={animations} />}
-            {activeLab === 'frect' && <FullRectifierVisualizer animations={animations} />}
-            {activeLab === 'zener' && <ZenerVisualizer />}
-            {activeLab === 'ohms' && <OhmsLawVisualizer />}
-            {activeLab === 'filter' && <BodePlotVisualizer />}
-            {activeLab === 'reson' && <ResonanceVisualizer />}
-            {activeLab === 'transformer' && <TransformerVisualizer />}
-            {activeLab === 'gates' && <LogicGatesVisualizer />}
-          </div>
-        </div>
-      );
-    };
-
-    const CROVisualizer = ({ animations }) => {
-      const [isPlaying, setIsPlaying] = useState(true);
-      const [chA, setChA] = useState({ amp: 2.5, freq: 40 });
-      const canvasRef = useRef(null); const animRef = useRef(null); const timeRef = useRef(0);
-
-      useEffect(() => {
-        const canvas = canvasRef.current; if (!canvas) return;
-        const ctx = canvas.getContext('2d'); if (!ctx) return;
-        const draw = () => {
-          const { width, height } = canvas; ctx.clearRect(0, 0, width, height);
-          if (isPlaying && animations) timeRef.current += 0.005;
-          ctx.beginPath(); ctx.strokeStyle = '#10B981'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-          for (let x = 0; x < width; x++) {
-            const t = (x / width) * 0.1 + timeRef.current; 
-            const y = (height / 2) - (chA.amp * 20 * Math.sin(2 * Math.PI * chA.freq * t));
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke(); animRef.current = requestAnimationFrame(draw);
-        };
-        animRef.current = requestAnimationFrame(draw);
-        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-      }, [isPlaying, chA, animations]);
-
-      return (
-        <Widget title="Alternating Current Waves" icon={Monitor}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-100 dark:bg-slate-950 border-4 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
-              <div className="absolute inset-0 cro-grid opacity-60"></div>
-              <div className="absolute top-1/2 left-0 w-full h-px bg-sky-500/50"></div>
-              <div className="absolute top-0 left-1/2 w-px h-full bg-sky-500/50"></div>
-              <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10 drop-shadow-[0_0_4px_rgba(16,185,129,0.8)]" />
-              <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-emerald-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                <Send size={18} />
               </button>
             </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Zap className="w-5 h-5 mr-3 text-violet-600 dark:text-violet-500" /> Signal Control</h4>
-              <div className="space-y-10">
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600 dark:text-violet-400">{chA.amp}V</span></div>
-                  <input type="range" min="0" max="5" step="0.5" value={chA.amp} onChange={e => setChA({...chA, amp: Number(e.target.value)||0})} className="text-violet-500" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-violet-600 dark:text-violet-400">{chA.freq}Hz</span></div>
-                  <input type="range" min="10" max="100" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||0})} className="text-violet-500" />
-                </div>
-              </div>
+            <div className="text-center mt-2">
+              <span className="text-[10px] opacity-50">Press Enter to send, Shift+Enter for new line.</span>
             </div>
           </div>
-        </Widget>
-      );
-    };
-
-    const RectifierVisualizer = ({ animations }) => {
-      const [isPlaying, setIsPlaying] = useState(true);
-      const [chA, setChA] = useState({ amp: 4, freq: 20 });
-      const canvasRef = useRef(null); const animRef = useRef(null); const timeRef = useRef(0);
-
-      useEffect(() => {
-        const canvas = canvasRef.current; if (!canvas) return;
-        const ctx = canvas.getContext('2d'); if (!ctx) return;
-        const draw = () => {
-          const { width, height } = canvas; ctx.clearRect(0, 0, width, height);
-          if (isPlaying && animations) timeRef.current += 0.005;
-
-          ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; ctx.lineWidth = 2;
-          for (let x = 0; x < width; x++) {
-            const t = (x / width) * 0.1 + timeRef.current; 
-            const y = (height / 2) - (chA.amp * 20 * Math.sin(2 * Math.PI * chA.freq * t));
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-
-          ctx.beginPath(); ctx.strokeStyle = '#8B5CF6'; ctx.lineWidth = 4; ctx.lineCap = 'round';
-          for (let x = 0; x < width; x++) {
-            const t = (x / width) * 0.1 + timeRef.current; 
-            let val = Math.sin(2 * Math.PI * chA.freq * t);
-            if (val < 0) val = 0;
-            const y = (height / 2) - (chA.amp * 20 * val);
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-          animRef.current = requestAnimationFrame(draw);
-        };
-        animRef.current = requestAnimationFrame(draw);
-        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-      }, [isPlaying, chA, animations]);
-
-      return (
-        <Widget title="Half-Wave Rectifier Waveforms" icon={Activity}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-100 dark:bg-slate-950 border-4 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
-              <div className="absolute top-1/2 left-0 w-full h-px bg-violet-500/50"></div>
-              <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10" />
-              <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-violet-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-              </button>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-violet-600 dark:text-violet-500" /> AC Input Source</h4>
-              <div className="space-y-10">
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-violet-600 dark:text-violet-400">{chA.amp}V</span></div>
-                  <input type="range" min="1" max="6" step="0.5" value={chA.amp} onChange={e => setChA({...chA, amp: Number(e.target.value)||1})} className="text-violet-500" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-violet-600 dark:text-violet-400">{chA.freq}Hz</span></div>
-                  <input type="range" min="10" max="60" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||10})} className="text-violet-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const FullRectifierVisualizer = ({ animations }) => {
-      const [isPlaying, setIsPlaying] = useState(true);
-      const [chA, setChA] = useState({ amp: 4, freq: 20 });
-      const canvasRef = useRef(null); const animRef = useRef(null); const timeRef = useRef(0);
-
-      useEffect(() => {
-        const canvas = canvasRef.current; if (!canvas) return;
-        const ctx = canvas.getContext('2d'); if (!ctx) return;
-        const draw = () => {
-          const { width, height } = canvas; ctx.clearRect(0, 0, width, height);
-          if (isPlaying && animations) timeRef.current += 0.005;
-
-          ctx.beginPath(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)'; ctx.lineWidth = 2;
-          for (let x = 0; x < width; x++) {
-            const t = (x / width) * 0.1 + timeRef.current; 
-            const y = (height / 2) - (chA.amp * 20 * Math.sin(2 * Math.PI * chA.freq * t));
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-
-          ctx.beginPath(); ctx.strokeStyle = '#EC4899'; ctx.lineWidth = 4; ctx.lineCap = 'round';
-          for (let x = 0; x < width; x++) {
-            const t = (x / width) * 0.1 + timeRef.current; 
-            let val = Math.abs(Math.sin(2 * Math.PI * chA.freq * t));
-            const y = (height / 2) - (chA.amp * 20 * val);
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-          animRef.current = requestAnimationFrame(draw);
-        };
-        animRef.current = requestAnimationFrame(draw);
-        return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
-      }, [isPlaying, chA, animations]);
-
-      return (
-        <Widget title="Full-Wave Bridge Rectifier" icon={Activity}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 relative w-full h-[360px] bg-slate-100 dark:bg-slate-950 border-4 border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden flex items-center justify-center shadow-xl">
-              <div className="absolute top-1/2 left-0 w-full h-px bg-pink-500/50"></div>
-              <canvas ref={canvasRef} width={800} height={360} className="absolute inset-0 w-full h-full z-10" />
-              <button onClick={() => setIsPlaying(!isPlaying)} className="absolute bottom-5 right-5 z-20 bg-slate-900/80 text-pink-400 p-4 border border-slate-700 rounded-2xl shadow-xl hover:scale-110 transition-transform">
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
-              </button>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl flex flex-col justify-center border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-              <h4 className="font-bold mb-10 flex items-center tracking-wide"><Activity className="w-5 h-5 mr-3 text-pink-600 dark:text-pink-500" /> AC Input Source</h4>
-              <div className="space-y-10">
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Amplitude (Vm)</span> <span className="text-pink-600 dark:text-pink-400">{chA.amp}V</span></div>
-                  <input type="range" min="1" max="6" step="0.5" value={chA.amp} onChange={e => setChA({...chA, amp: Number(e.target.value)||1})} className="text-pink-500" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Frequency (f)</span> <span className="text-pink-600 dark:text-pink-400">{chA.freq}Hz</span></div>
-                  <input type="range" min="10" max="60" step="5" value={chA.freq} onChange={e => setChA({...chA, freq: Number(e.target.value)||10})} className="text-pink-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const ZenerVisualizer = () => {
-      const [vz, setVz] = useState(5); 
-      const [vin, setVin] = useState(-8); 
-      
-      const buildPath = () => {
-        const pts = [];
-        for(let v=-10; v<=0; v+=0.1) {
-          let i = v < -vz ? -Math.pow((-v - vz)*2, 2) * 5 : 0; 
-          pts.push(`${(v+10) * 10},${100 - (i / -50) * 100}`);
-        }
-        return `M ${pts.join(' L ')}`;
-      };
-      const currentI = vin < -vz ? -Math.pow((-vin - vz)*2, 2) * 5 : 0;
-
-      return (
-        <Widget title="Zener Diode Breakdown" icon={Activity}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Breakdown Voltage (Vz)</span> <span className="text-violet-600 dark:text-violet-400">{vz.toFixed(1)} V</span></div>
-                    <input type="range" min="2" max="9" step="0.5" value={vz} onChange={e => setVz(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Input Voltage (Vin)</span> <span className="text-violet-600 dark:text-violet-400">{vin.toFixed(1)} V</span></div>
-                    <input type="range" min="-10" max="0" step="0.1" value={vin} onChange={e => setVin(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Reverse Current (Iz)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
-                  </div>
-              </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
-                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <line x1="100" y1="100" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <text x="100" y="-3" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">V (-10 to 0)</text>
-                  <text x="106" y="100" fill="currentColor" fontSize="4" textAnchor="start" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Iz (-mA)</text>
-                  <path d={buildPath()} fill="none" stroke="#8B5CF6" strokeWidth="2.5" />
-                  <circle cx={(vin+10)*10} cy={100 - (currentI/-50)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
-                </svg>
-              </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const OhmsLawVisualizer = () => {
-      const [v, setV] = useState(10); 
-      const [r, setR] = useState(2); 
-      const i = v / r;
-
-      return (
-        <Widget title="Ohm's Law Verification" icon={Zap}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Voltage (V)</span> <span className="text-violet-600 dark:text-violet-400">{v.toFixed(1)} V</span></div>
-                    <input type="range" min="0" max="20" step="1" value={v} onChange={e => setV(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Resistance (R)</span> <span className="text-violet-600 dark:text-violet-400">{r.toFixed(1)} kΩ</span></div>
-                    <input type="range" min="1" max="10" step="0.5" value={r} onChange={e => setR(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Current (I)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{i.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
-                  </div>
-              </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
-                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">V (Volts)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">I (mA)</text>
-                  <path d={`M 0,100 L 100,${100 - (20/r)*5}`} fill="none" stroke="#10B981" strokeWidth="2.5" />
-                  <circle cx={(v/20)*100} cy={100 - (i/20)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
-                  <line x1={(v/20)*100} y1="100" x2={(v/20)*100} y2={100 - (i/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
-                  <line x1="0" y1={100 - (i/20)*100} x2={(v/20)*100} y2={100 - (i/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
-                </svg>
-              </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const BodePlotVisualizer = () => {
-      const [r, setR] = useState(1); 
-      const [c, setC] = useState(1); 
-      const fc = 1 / (2 * Math.PI * (r*1000) * (c/1000000));
-      
-      const buildPath = () => {
-        const pts = [];
-        for(let i=0; i<=100; i++) {
-          let f = Math.pow(10, (i/100)*4); 
-          let gain = 20 * Math.log10(1 / Math.sqrt(1 + Math.pow(f/fc, 2)));
-          pts.push(`${i},${Math.max(0, 100 + gain*2.5)}`); 
-        }
-        return `M ${pts.join(' L ')}`;
-      };
-
-      return (
-        <Widget title="RC Low Pass Filter Bode Plot" icon={Radio}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Resistance (R)</span> <span className="text-violet-600 dark:text-violet-400">{r.toFixed(1)} kΩ</span></div>
-                    <input type="range" min="0.1" max="10" step="0.1" value={r} onChange={e => setR(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Capacitance (C)</span> <span className="text-violet-600 dark:text-violet-400">{c.toFixed(1)} µF</span></div>
-                    <input type="range" min="0.1" max="10" step="0.1" value={c} onChange={e => setC(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Cutoff Freq (fc)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{fc.toFixed(1)} <span className="text-lg opacity-50">Hz</span></span>
-                  </div>
-              </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
-                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Log(Freq)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Gain (dB)</text>
-                  <path d={buildPath()} fill="none" stroke="#F97316" strokeWidth="2.5" />
-                </svg>
-              </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const ResonanceVisualizer = () => {
-      const [l, setL] = useState(10); 
-      const [c, setC] = useState(10); 
-      const fr = 1 / (2 * Math.PI * Math.sqrt((l/1000) * (c/1000000)));
-      
-      const buildPath = () => {
-        const pts = [];
-        for(let i=0; i<=100; i++) {
-          let f = i * 20; 
-          if(f===0) f=0.1;
-          let xl = 2 * Math.PI * f * (l/1000);
-          let xc = 1 / (2 * Math.PI * f * (c/1000000));
-          let current = 10 / Math.sqrt(100 + Math.pow(xl - xc, 2)); 
-          pts.push(`${i},${100 - current*80}`); 
-        }
-        return `M ${pts.join(' L ')}`;
-      };
-
-      return (
-        <Widget title="Series RLC Resonance Curve" icon={Globe}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Inductance (L)</span> <span className="text-violet-600 dark:text-violet-400">{l.toFixed(1)} mH</span></div>
-                    <input type="range" min="1" max="50" step="1" value={l} onChange={e => setL(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Capacitance (C)</span> <span className="text-violet-600 dark:text-violet-400">{c.toFixed(1)} µF</span></div>
-                    <input type="range" min="1" max="50" step="1" value={c} onChange={e => setC(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Resonant Freq (fr)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{fr.toFixed(0)} <span className="text-lg opacity-50">Hz</span></span>
-                  </div>
-              </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
-                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Freq (Hz)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Current (I)</text>
-                  <path d={buildPath()} fill="none" stroke="#EAB308" strokeWidth="2.5" />
-                  <line x1={(fr/2000)*100} y1="100" x2={(fr/2000)*100} y2="0" stroke="#ef4444" strokeWidth="0.5" strokeDasharray="2 2" />
-                </svg>
-              </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const TransformerVisualizer = () => {
-      const [np, setNp] = useState(100); 
-      const [ns, setNs] = useState(200); 
-      const [vp, setVp] = useState(120); 
-      
-      const vs = (vp * (ns / np)).toFixed(1);
-      const isStepUp = ns > np;
-
-      return (
-        <Widget title="Transformer Turns Ratio" icon={Layers}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Primary Turns (Np)</span> <span className="text-violet-600 dark:text-violet-400">{np}</span></div>
-                    <input type="range" min="10" max="500" step="10" value={np} onChange={e => setNp(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Secondary Turns (Ns)</span> <span className="text-violet-600 dark:text-violet-400">{ns}</span></div>
-                    <input type="range" min="10" max="500" step="10" value={ns} onChange={e => setNs(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Primary Voltage (Vp)</span> <span className="text-violet-600 dark:text-violet-400">{vp} V</span></div>
-                    <input type="range" min="10" max="240" step="10" value={vp} onChange={e => setVp(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-              </div>
-              <div className="bg-slate-100 dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center p-8 shadow-inner text-slate-900 dark:text-slate-100">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Secondary Voltage (Vs)</div>
-                  <div className="text-6xl font-mono font-bold mb-4">{vs} V</div>
-                  <div className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${isStepUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
-                    {isStepUp ? 'Step-Up Transformer' : 'Step-Down Transformer'}
-                  </div>
-              </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const DiodeVisualizer = () => {
-      const [vd, setVd] = useState(0); 
-      const buildPath = () => {
-        const pts = [];
-        for(let v=0; v<=1; v+=0.02) {
-          let i = v > 0.5 ? Math.pow((v - 0.5) * 2, 3) * 20 : 0; 
-          pts.push(`${v * 100},${100 - (i / 20) * 100}`);
-        }
-        return `M 0,100 L ${pts.join(' L ')}`;
-      };
-      const currentI = vd > 0.5 ? Math.pow((vd - 0.5) * 2, 3) * 20 : 0;
-
-      return (
-        <Widget title="Diode Forward Bias" icon={Activity}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-8 p-8 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-slate-200">
-                  <div>
-                    <div className="flex justify-between text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest mb-4"><span>Forward Voltage (Vd)</span> <span className="text-violet-600 dark:text-violet-400">{vd.toFixed(2)} V</span></div>
-                    <input type="range" min="0" max="1" step="0.05" value={vd} onChange={e => setVd(Number(e.target.value))} className="text-violet-500" />
-                  </div>
-                  <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Forward Current (Id)</span>
-                    <span className="text-4xl font-mono font-bold text-slate-900 dark:text-white">{currentI.toFixed(2)} <span className="text-lg opacity-50">mA</span></span>
-                  </div>
-              </div>
-              <div className="relative w-full h-[320px] bg-white dark:bg-[#050505] border border-slate-200 dark:border-slate-800 rounded-3xl flex items-center justify-center p-8 overflow-hidden shadow-inner">
-                <svg viewBox="-10 -10 115 115" className="w-full h-full overflow-visible">
-                  <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <line x1="0" y1="100" x2="0" y2="0" stroke="currentColor" strokeWidth="0.5" className="text-slate-400 dark:text-slate-700" />
-                  <text x="100" y="108" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Vd (V)</text>
-                  <text x="-4" y="0" fill="currentColor" fontSize="4" textAnchor="end" className="font-mono text-slate-500 dark:text-slate-400 font-bold">Id (mA)</text>
-                  <path d={buildPath()} fill="none" stroke="#3b82f6" strokeWidth="2.5" />
-                  <circle cx={vd*100} cy={100 - (currentI/20)*100} r="3" fill="#ef4444" className="transition-all duration-200 shadow-md" />
-                  <line x1={vd*100} y1="100" x2={vd*100} y2={100 - (currentI/20)*100} stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
-                </svg>
-              </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    const LogicGatesVisualizer = () => {
-      const [inputs, setInputs] = useState([0, 0]);
-      const addInput = () => { if (inputs.length < 5) setInputs([...inputs, 0]); };
-      const removeInput = () => { if (inputs.length > 2) setInputs(inputs.slice(0, -1)); };
-      const toggleInput = (index) => { const newInputs = [...inputs]; newInputs[index] = newInputs[index] === 0 ? 1 : 0; setInputs(newInputs); };
-
-      const calcAND = inputs.every(v => v === 1) ? 1 : 0;
-      const calcOR = inputs.some(v => v === 1) ? 1 : 0;
-      const calcNAND = calcAND === 1 ? 0 : 1;
-      const calcNOR = calcOR === 1 ? 0 : 1;
-      const calcXOR = inputs.reduce((acc, val) => acc ^ val, 0);
-      const calcXNOR = calcXOR === 1 ? 0 : 1;
-
-      const inputLabels = ['A', 'B', 'C', 'D', 'E'];
-
-      return (
-        <Widget title="Digital Boolean Logic" icon={GitBranch}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="flex flex-col justify-center items-center py-12 px-6 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl relative overflow-hidden shadow-sm">
-              <div className="absolute top-6 right-6 flex space-x-3 z-20">
-                <button onClick={removeInput} disabled={inputs.length <= 2} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-700 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">-</span></button>
-                <button onClick={addInput} disabled={inputs.length >= 5} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:shadow-md transition-all text-slate-700 dark:text-slate-300"><span className="text-2xl font-mono font-bold leading-none pb-1">+</span></button>
-              </div>
-              <div className="flex flex-wrap justify-center gap-6 mb-8 mt-10 z-10">
-                {inputs.map((val, idx) => (
-                  <div key={idx} className="flex flex-col items-center space-y-4">
-                    <button onClick={() => toggleInput(idx)} className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full border-[4px] flex items-center justify-center text-4xl sm:text-5xl font-mono font-bold transition-all duration-300 shadow-xl ${val === 1 ? 'border-violet-500 bg-violet-500 text-white shadow-violet-500/40 scale-110' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-violet-300 dark:hover:border-violet-600'}`}>{val}</button>
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest bg-white/80 dark:bg-slate-800/80 px-3 py-1 rounded-full backdrop-blur-md border border-slate-200 dark:border-slate-700">In {inputLabels[idx]}</span>
-                  </div>
-                ))}
-              </div>
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse border px-4 py-1.5 border-slate-300 dark:border-slate-700 rounded-full bg-white dark:bg-slate-800 z-10">Click Nodes To Toggle</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { name: 'AND', val: calcAND, color: 'text-blue-600 dark:text-blue-500', bg: 'bg-blue-500' }, { name: 'OR', val: calcOR, color: 'text-emerald-600 dark:text-emerald-500', bg: 'bg-emerald-500' },
-                { name: 'NAND', val: calcNAND, color: 'text-rose-600 dark:text-rose-500', bg: 'bg-rose-500' }, { name: 'NOR', val: calcNOR, color: 'text-amber-600 dark:text-amber-500', bg: 'bg-amber-500' },
-                { name: 'XOR', val: calcXOR, color: 'text-purple-600 dark:text-purple-500', bg: 'bg-purple-500' }, { name: 'XNOR', val: calcXNOR, color: 'text-cyan-600 dark:text-cyan-500', bg: 'bg-cyan-500' }
-              ].map(gate => (
-                <div key={gate.name} className="flex flex-col items-center justify-center p-6 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-3xl group hover:border-violet-400 dark:hover:border-violet-600 transition-colors duration-300 shadow-sm">
-                  <span className={`font-bold tracking-widest uppercase mb-4 ${gate.color}`}>{gate.name}</span>
-                  <span className={`w-14 h-14 flex items-center justify-center rounded-2xl text-2xl font-mono transition-all duration-300 shadow-lg border border-slate-200 dark:border-slate-700 ${gate.val === 1 ? `${gate.bg} text-white scale-110 border-none` : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>{gate.val}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Widget>
-      );
-    };
-
-    // --- SGPA CALCULATOR ---
-    const SGPAView = () => {
-      const [grades, setGrades] = useState(KTU_SUBJECTS.reduce((a, s) => ({ ...a, [s.code]: 'A' }), {}));
-      const sgpa = useMemo(() => {
-        let pts = 0, crd = 0;
-        KTU_SUBJECTS.forEach(s => { pts += GRADES[grades[s.code]] * s.credits; crd += s.credits; });
-        return (pts / crd).toFixed(2);
-      }, [grades]);
-
-      return (
-        <div className="animate-in fade-in duration-700">
-          <Widget title="Academic Grade Engine" icon={Calculator}>
-             <div className="flex flex-col lg:flex-row gap-10">
-                <div className="flex-1 space-y-3">
-                  {KTU_SUBJECTS.map((subj) => (
-                    <div key={subj.code} className="flex justify-between items-center py-3 px-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-800 transition-colors">
-                      <div className="text-sm flex flex-col sm:flex-row sm:items-center">
-                        <span className="font-bold text-slate-900 dark:text-slate-200 sm:mr-4">{subj.code}</span> 
-                        <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">{subj.name}</span>
-                      </div>
-                      <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-5 text-base font-bold outline-none cursor-pointer focus:border-violet-500 transition-colors shadow-sm text-slate-900 dark:text-slate-200" value={grades[subj.code]} onChange={(e) => setGrades({...grades, [subj.code]: e.target.value})}>
-                        {Object.keys(GRADES).map(g => <option key={g} value={g}>{g}</option>)}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-                <div className="w-full lg:w-96 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-3xl flex flex-col items-center justify-center p-10 shadow-xl shadow-violet-500/20 text-white">
-                  <div className="text-sm font-bold uppercase tracking-widest mb-6 text-violet-100">Calculated SGPA</div>
-                  <div className="text-8xl font-bold tracking-tighter mb-4 drop-shadow-lg">{sgpa}</div>
-                </div>
-             </div>
-          </Widget>
-        </div>
-      );
-    };
-
-    // --- ABOUT ---
-    const AboutView = ({ state, dispatch }) => {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in zoom-in-95 duration-500">
-          <div className="relative bg-white dark:bg-slate-900/80 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl p-10 flex flex-col h-full shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-none overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-all duration-700"></div>
-            <div className="relative z-10 flex-grow">
-              <div className="inline-flex items-center space-x-2 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
-                <User className="w-3.5 h-3.5" /><span>Created By</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-slate-900 dark:text-white">{APP_CONFIG.creator}</h2>
-              <p className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-8 flex items-center"><GraduationCap className="w-5 h-5 mr-3 text-slate-500 dark:text-slate-400" /> {APP_CONFIG.course}</p>
-              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 mb-8">
-                <p className="text-base leading-relaxed text-slate-800 dark:text-slate-300 font-medium">
-                  This project was prepared as part of the mini-project for our first-year <strong>EE & IPR</strong> subject. Designed explicitly for the {APP_CONFIG.university} syllabus, this acts as a comprehensive academic companion.
-                </p>
-              </div>
-            </div>
-            <div className="relative z-10 pt-8 border-t border-slate-200 dark:border-slate-800">
-              <a href={`mailto:${APP_CONFIG.email}`} className="inline-flex items-center space-x-3 text-sm font-bold text-slate-800 dark:text-slate-300 hover:text-violet-600 transition-colors">
-                <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-full"><Mail className="w-4 h-4" /></div><span>{APP_CONFIG.email}</span>
-              </a>
-            </div>
-          </div>
-
-          <Widget title="System Settings" icon={Settings}>
-            <div className="space-y-10 flex flex-col h-full">
-              <div className="flex-grow">
-                <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-5">UI Theme Option</h4>
-                <div className="grid grid-cols-1 gap-4">
-                  {[
-                    { id: 'dark', label: 'Deep Slate', icon: Moon },
-                    { id: 'light', label: 'Soft Ivory', icon: Sun },
-                    { id: 'colourful', label: 'Vibrant Glass', icon: Palette },
-                    { id: 'matrix', label: 'Matrix Grid', icon: Layers }
-                  ].map(t => (
-                    <button key={t.id} onClick={() => dispatch({ type: 'SET_THEME', payload: t.id })} className={`flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all duration-300 ${state.theme === t.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 font-bold shadow-sm' : 'border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-violet-300 dark:hover:bg-slate-900'}`}>
-                      <t.icon className="w-5 h-5" /><span className="text-sm uppercase tracking-wider">{t.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="pt-8 border-t border-slate-200 dark:border-slate-800">
-                 <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-5">Performance</h4>
-                 <label className="flex items-center justify-between p-5 border-2 border-slate-200 dark:border-slate-800 rounded-2xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors group">
-                  <div className="flex items-center space-x-4">
-                    <Activity className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors" />
-                    <div className="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">Animations Enabled</div>
-                  </div>
-                  <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 shadow-inner ${state.animations ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-                       onClick={() => dispatch({ type: 'TOGGLE_ANIMATIONS' })}>
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 shadow-sm ${state.animations ? 'left-7' : 'left-1'}`}></div>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </Widget>
-        </div>
-      );
-    };
-
-    // ==========================================
-    // APP LOGIC & ROUTING
-    // ==========================================
-    const initialState = { theme: 'dark', activeTab: 'news', animations: true, isSidebarOpen: false };
-    function reducer(state, action) {
-      switch (action.type) {
-        case 'SET_THEME': return { ...state, theme: action.payload };
-        case 'SET_TAB': return { ...state, activeTab: action.payload, isSidebarOpen: false }; 
-        case 'TOGGLE_ANIMATIONS': return { ...state, animations: !state.animations };
-        case 'TOGGLE_SIDEBAR': return { ...state, isSidebarOpen: !state.isSidebarOpen };
-        default: return state;
-      }
-    }
-
-    const Toast = ({ message, onClose }) => (
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-4 rounded-full font-bold text-xs uppercase tracking-widest z-50 flex items-center shadow-2xl animate-in slide-in-from-bottom-10 fade-in">
-        <span>{message}</span><button onClick={onClose} className="ml-4 opacity-50 hover:opacity-100"><X className="w-4 h-4" /></button>
-      </div>
-    );
-
-    function NexusApp() {
-      const [state, dispatch] = useReducer(reducer, initialState);
-      const [toast, setToast] = useState(null);
-
-      const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 4000); };
-
-      useEffect(() => {
-        const root = document.documentElement;
-        const body = document.body;
-        root.classList.remove('light', 'dark');
-        body.classList.remove('matrix');
-        body.classList.remove('colourful');
-        
-        if (state.theme === 'dark') {
-          root.classList.add('dark');
-        } else if (state.theme === 'light') {
-          root.classList.add('light');
-        } else if (state.theme === 'matrix') {
-          root.classList.add('dark'); 
-          body.classList.add('matrix'); 
-        } else if (state.theme === 'colourful') {
-          root.classList.add('light'); 
-          body.classList.add('colourful'); 
-        }
-      }, [state.theme]);
-
-      const getBackgroundClass = () => {
-        if (state.theme === 'matrix') return 'bg-matrix';
-        if (state.theme === 'dark') return 'bg-ambient-dark'; 
-        if (state.theme === 'colourful') return 'bg-ambient-colourful'; 
-        return 'bg-ambient-light';
-      };
-
-      const TABS = [
-        { id: 'news', label: 'Tech News Feed', icon: Globe },
-        { id: 'dashboard', label: 'Command Center', icon: Activity },
-        { id: 'timetable', label: 'Academic Schedule', icon: Calendar },
-        { id: 'tools', label: 'Engineering Tools', icon: Terminal },
-        { id: 'lab', label: 'Virtual Laboratories', icon: Cpu },
-        { id: 'calc', label: 'Academic Grades', icon: Calculator },
-        { id: 'about', label: 'System Info & Settings', icon: Sliders }
-      ];
-
-      return (
-        <div className={`min-h-screen flex flex-col ${getBackgroundClass()} selection:bg-violet-500 selection:text-white relative overflow-hidden`}>
-          {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-          
-          <ContextAmbientEngine theme={state.theme} enabled={state.animations} activeTab={state.activeTab} />
-
-          <div className={`fixed inset-0 bg-slate-900/30 backdrop-blur-md z-40 transition-all duration-500 ${state.isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}></div>
-
-          <aside className={`fixed top-0 left-0 h-full w-[300px] bg-white/95 dark:bg-slate-950/95 backdrop-blur-3xl border-r border-slate-200/50 dark:border-slate-800/50 z-50 transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col shadow-2xl ${state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-            <div className="p-6 md:p-8 flex justify-between items-center border-b border-slate-200/80 dark:border-slate-800/80">
-               <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-violet-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30"><Cpu className="w-6 h-6" /></div>
-                  <div className="flex flex-col">
-                    <span className="font-bold tracking-widest uppercase text-lg text-slate-900 dark:text-white leading-none">ECE Hub</span>
-                  </div>
-               </div>
-               <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-2.5 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 transition-colors"><X className="w-5 h-5" /></button>
-            </div>
-
-            <div className="flex-grow py-8 px-6 space-y-2 overflow-y-auto z-50">
-              <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest px-4 mb-6">Menu Options</div>
-              {TABS.map(tab => (
-                <button key={tab.id} onClick={() => dispatch({ type: 'SET_TAB', payload: tab.id })} className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all duration-300 border ${state.activeTab === tab.id ? 'bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20 text-violet-700 dark:text-violet-400 shadow-sm translate-x-2' : 'bg-transparent border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-100'}`}>
-                  <div className="flex items-center space-x-4"><tab.icon className="w-5 h-5" /><span>{tab.label}</span></div>
-                  {state.activeTab === tab.id && <ChevronRight className="w-4 h-4" />}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-8 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 z-50">
-               <div className="flex flex-col">
-                 <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Created By</div>
-                 <div className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">{APP_CONFIG.creator}</div>
-               </div>
-            </div>
-          </aside>
-
-          <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/60 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800/80 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-20 flex items-center justify-between">
-              <div className="flex items-center space-x-5">
-                <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="p-3 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl hover:shadow-sm transition-all active:scale-95 text-slate-700 dark:text-slate-300"><Menu className="w-5 h-5" /></button>
-                <div className="hidden sm:flex flex-col border-l-2 border-slate-200 dark:border-slate-700 pl-5">
-                  <span className="font-bold tracking-[0.2em] uppercase text-base text-slate-900 dark:text-white leading-none">{APP_CONFIG.name}</span>
-                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase mt-2 leading-none tracking-widest">{APP_CONFIG.university}</span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-5">
-                <span className="hidden md:inline text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">{TABS.find(t => t.id === state.activeTab).label}</span>
-              </div>
-            </div>
-          </header>
-
-          <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-8 py-10 relative z-10 transition-all duration-500 flex flex-col">
-             {state.activeTab === 'news' && <NewsHubView showToast={showToast} />}
-             {state.activeTab === 'dashboard' && <DashboardView />}
-             {state.activeTab === 'timetable' && <TimetableView showToast={showToast} />}
-             {state.activeTab === 'tools' && <ToolsView />}
-             {state.activeTab === 'lab' && <VirtualLabManager animations={state.animations} />}
-             {state.activeTab === 'calc' && <SGPAView />}
-             {state.activeTab === 'about' && <AboutView state={state} dispatch={dispatch} />}
-          </main>
 
         </div>
-      );
-    }
+      </main>
+    </div>
+  );
+}
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<NexusApp />);
-  </script>
-</body>
-</html>
